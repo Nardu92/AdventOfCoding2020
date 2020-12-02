@@ -5,12 +5,4 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Day2\Input2.1.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Day2\Input2.1.txt" />
-  </ItemGroup>
-
 </Project>

@@ -10,7 +10,7 @@ namespace AdventOfCode.Day1
         public static int Day1_1Solution()
         {
             HashSet<int> foundNum = new HashSet<int>();
-            using StreamReader inputFile = new StreamReader(@"C:\Users\nicna\source\repos\AdventOfCode\AdventOfCode\Day1\Input1.1.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
             string line;
             while ((line = inputFile.ReadLine()) != null)
             {
@@ -28,7 +28,7 @@ namespace AdventOfCode.Day1
         public static int Day1_2Solution()
         {
             HashSet<int> foundNum = new HashSet<int>();
-            using StreamReader inputFile = new StreamReader(@"C:\Users\nicna\source\repos\AdventOfCode\AdventOfCode\Day1\Input1.1.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
             string line;
             while ((line = inputFile.ReadLine()) != null)
             {
