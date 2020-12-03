@@ -38,29 +38,30 @@ namespace AdventOfCode.Day2
 
         public static int Day2_2Solution()
         {
-            HashSet<int> foundNum = new HashSet<int>();
-            using StreamReader inputFile = new StreamReader(@".\..\..\..\Input1.1.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day2\Input2.1.txt");
             string line;
+            int validPasswords = 0;
             while ((line = inputFile.ReadLine()) != null)
             {
-                var value = Convert.ToInt32(line);
-                foundNum.Add(value);
-            }
+                var linetokens = line.Split(" ");
+                var occurrencyTokens = linetokens[0].Split("-");
+                var minOccurrency = Convert.ToInt32(occurrencyTokens[0]);
+                var maxOccurrency = Convert.ToInt32(occurrencyTokens[1]);
 
-            foreach( int i in foundNum)
-            {
-                foreach (int j in foundNum)
+                char letter = linetokens[1][0];
+
+                var password = linetokens[2];
+
+                var first = password[minOccurrency-1]== letter;
+                var second = password[maxOccurrency-1]== letter;
+
+                if(first ^ second)
                 {
-                    foreach (int k in foundNum)
-                    {
-                        if(i+j+k == 2020)
-                        {
-                            return i * j * k;
-                        }
-                    }
+                    validPasswords++;
                 }
+
             }
-            return -1;
+            return validPasswords;
         }
     }
 }
