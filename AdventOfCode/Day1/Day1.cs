@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 
 namespace AdventOfCode.Day1
 {
@@ -9,44 +9,49 @@ namespace AdventOfCode.Day1
     {
         public static int Day1_1Solution()
         {
-            HashSet<int> foundNum = new HashSet<int>();
-            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
+            var foundNum = CreateSet();
+
+            var pair = FindPair(2020, foundNum);
+            return pair.Key * pair.Value;
+        }
+
+        private static HashSet<int> CreateSet()
+        {
+            HashSet<int> numberSet = new HashSet<int>();
+            StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
             string line;
             while ((line = inputFile.ReadLine()) != null)
             {
                 var value = Convert.ToInt32(line);
-                foundNum.Add(value);
-                var diff = 2020 - value;
-                if (foundNum.TryGetValue(diff, out int actualValue))
+                numberSet.Add(value);
+            }
+            return numberSet;
+        }
+
+        private static KeyValuePair<int, int> FindPair(int sum, HashSet<int> set)
+        {
+            foreach (var number in set)
+            {
+                var diff = sum - number;
+               
+                if (diff!= number && set.TryGetValue(diff, out int actualValue))
                 {
-                    return diff * value;
+                    return new KeyValuePair<int, int>(number, actualValue);
                 }
             }
-            return -1;
+            return new KeyValuePair<int, int>(-1, -1);
         }
 
         public static int Day1_2Solution()
         {
-            HashSet<int> foundNum = new HashSet<int>();
-            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
-            string line;
-            while ((line = inputFile.ReadLine()) != null)
-            {
-                var value = Convert.ToInt32(line);
-                foundNum.Add(value);
-            }
+            var set = CreateSet();
 
-            foreach( int i in foundNum)
+            foreach (int i in set)
             {
-                foreach (int j in foundNum)
+                var pair = FindPair(2020 - i, set.Except(new int[1] { i }).ToHashSet());
+                if (pair.Key != -1)
                 {
-                    foreach (int k in foundNum)
-                    {
-                        if(i+j+k == 2020)
-                        {
-                            return i * j * k;
-                        }
-                    }
+                    return i * pair.Key * pair.Value;
                 }
             }
             return -1;

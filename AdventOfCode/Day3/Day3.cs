@@ -42,7 +42,6 @@ namespace AdventOfCode.Day3
             while ((line = inputFile.ReadLine()) != null)
             {
                 //....#.##.....###...#...##.##...
-                var linetokens = line.Split(" ");
                 var row = new bool[line.Length];
 
                 for (int i = 0; i < line.Length; i++)
