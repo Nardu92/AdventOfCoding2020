@@ -34,10 +34,18 @@ namespace AdventOfCode
         }
 
 
-        public static int Day1_2Solution()
+        public static int Day5_2Solution()
         {
             var set = CreateSet();
-
+            var max = set.Max();
+            var min = set.Min();
+            for (int i = min + 1; i < max; i++)
+            {
+                if(!set.TryGetValue(i, out int _))
+                {
+                    return i;
+                }
+            }
             return -1;
         }
     }
