@@ -33,32 +33,11 @@ namespace AdventOfCode
             return Convert.ToInt32(binaryText, 2);
         }
 
-        private static KeyValuePair<int, int> FindPair(int sum, HashSet<int> set)
-        {
-            foreach (var number in set)
-            {
-                var diff = sum - number;
-               
-                if (diff!= number && set.TryGetValue(diff, out int actualValue))
-                {
-                    return new KeyValuePair<int, int>(number, actualValue);
-                }
-            }
-            return new KeyValuePair<int, int>(-1, -1);
-        }
 
         public static int Day1_2Solution()
         {
             var set = CreateSet();
 
-            foreach (int i in set)
-            {
-                var pair = FindPair(2020 - i, set.Except(new int[1] { i }).ToHashSet());
-                if (pair.Key != -1)
-                {
-                    return i * pair.Key * pair.Value;
-                }
-            }
             return -1;
         }
     }
