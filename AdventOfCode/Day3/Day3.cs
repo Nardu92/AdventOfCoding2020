@@ -36,7 +36,7 @@ namespace AdventOfCode.Day3
 
         private static List<bool[]> BuildDataStructure()
         {
-            StreamReader inputFile = new StreamReader(@".\..\..\..\Day3\Input3.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day3\Input3.txt");
             string line;
             List<bool[]> dt = new List<bool[]>();
             while ((line = inputFile.ReadLine()) != null)

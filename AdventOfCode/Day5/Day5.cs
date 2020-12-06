@@ -9,14 +9,13 @@ namespace AdventOfCode
     {
         public static int Day5_1Solution()
         {
-
             return CreateSet().Max();
         }
 
         private static HashSet<int> CreateSet()
         {
             HashSet<int> numberSet = new HashSet<int>();
-            StreamReader inputFile = new StreamReader(@".\..\..\..\Day5\Input5.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day5\Input5.txt");
             string line;
             while ((line = inputFile.ReadLine()) != null)
             {

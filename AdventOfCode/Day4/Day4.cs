@@ -78,7 +78,7 @@ namespace AdventOfCode
 
         private static List<Passport> BuildDataStructure()
         {
-            StreamReader inputFile = new StreamReader(@".\..\..\..\Day4\Input4.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day4\Input4.txt");
             string line;
             List<Passport> dt = new List<Passport>();
             while ((line = inputFile.ReadLine()) != null)

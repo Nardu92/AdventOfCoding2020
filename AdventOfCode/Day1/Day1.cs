@@ -18,7 +18,7 @@ namespace AdventOfCode
         private static HashSet<int> CreateSet()
         {
             HashSet<int> numberSet = new HashSet<int>();
-            StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day1\Input1.1.txt");
             string line;
             while ((line = inputFile.ReadLine()) != null)
             {

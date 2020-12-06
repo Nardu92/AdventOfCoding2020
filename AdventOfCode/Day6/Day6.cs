@@ -26,7 +26,7 @@ namespace AdventOfCode
         private static List<HashSet<char>> CreateSet(bool withIntersection)
         {
             List<HashSet<char>> groups = new List<HashSet<char>>();
-            StreamReader inputFile = new StreamReader(@".\..\..\..\Day6\Input6.txt");
+            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day6\Input6.txt");
             HashSet<char> value;
             string line;
             while ((line = inputFile.ReadLine()) != null)
