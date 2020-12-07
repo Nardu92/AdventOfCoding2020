@@ -10,25 +10,40 @@ namespace AdventOfCode
         public static int Day7_1Solution()
         {
             var rules = CreateRules();
-            return KindOfDFS(rules["shiny gold"], new HashSet<Bag>()) -1;
+            return CountOuterBags(rules["shiny gold"], new HashSet<Bag>()) - 1;
         }
 
         public static int Day7_2Solution()
         {
 
-            return 0;
+            var rules = CreateRules();
+            return CountInnerBags(rules["shiny gold"]);
         }
 
-        public static int KindOfDFS(Bag bag, HashSet<Bag> visited)
+        public static int CountOuterBags(Bag bag, HashSet<Bag> visited)
         {
             if (!bag.Parents.Any()) return 1;
             var total = 0;
-            foreach(var b in bag.Parents)
+            foreach (var b in bag.Parents)
             {
-                if (!visited.Contains(b)) {
+                if (!visited.Contains(b))
+                {
                     visited.Add(b);
-                    total += KindOfDFS(b, visited);
+                    total += CountOuterBags(b, visited);
                 }
+            }
+            return total;
+        }
+
+        public static int CountInnerBags(Bag bag)
+        {
+            if (!bag.InnerBags.Any()) return 0;
+            var total = 0;
+            foreach (var tuple in bag.InnerBags)
+            {
+                var b = tuple.Item1;
+                var count = tuple.Item2;
+                total += (CountInnerBags(b) + 1) * count;
             }
             return total;
         }
@@ -43,14 +58,15 @@ namespace AdventOfCode
             {
                 var tokens = line[0..^1].Split("contain");
                 var parentToken = tokens[0][0..^6];
-                var innerBagsToken = tokens[1].Split(',').Select(x => x.Trim()).Select(x=> { if (x.StartsWith("1")){ return x[0..^4]; } else { return x[0..^5]; } }).ToList();
+                var innerBagsToken = tokens[1].Split(',').Select(x => x.Trim()).Select(x => { if (x.StartsWith("1")) { return x[0..^4]; } else { return x[0..^5]; } }).ToList();
                 Bag b;
                 if (rules.TryGetValue(parentToken, out Bag value))
                 {
                     b = value;
                     b.AddInnerBags(innerBagsToken, rules);
                 }
-                else {
+                else
+                {
                     b = new Bag(parentToken, innerBagsToken, rules);
                     rules.Add(b.Name, b);
                 }
