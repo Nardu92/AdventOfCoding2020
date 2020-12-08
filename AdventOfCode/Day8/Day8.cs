@@ -14,7 +14,13 @@ namespace AdventOfCode
 
         public static int Day8_2Solution()
         {
-            return 0;
+            ProgramDay8 p = ReadProgram(); 
+            while (!p.Completed)
+            {
+                p.ResetAndRepair();
+                p.Run();
+            }
+            return p.Output;
         }
 
         private static ProgramDay8 ReadProgram()
@@ -35,29 +41,19 @@ namespace AdventOfCode
     public class ProgramDay8
     {
         public List<Instruction> Instructions { get; private set; }
+
         public int Output { get; private set; }
+
         private HashSet<int> Executed;
-        private int InstructionPointer
-        {
-            get
-            {
-                return InstructionPointer;
-            }
-            set
-            {
-                PreviousInstructionPointer = InstructionPointer;
-                InstructionPointer = value;
-            }
-        }
-        private int PreviousInstructionPointer;
+
+        private int InstructionPointer;
+
+        public bool Completed { get; private set; } 
 
         public ProgramDay8()
         {
             Instructions = new List<Instruction>();
-            Output = 0;
-            Executed = new HashSet<int>();
-            InstructionPointer = 0;
-            PreviousInstructionPointer = 0;
+            Reset();
         }
 
         public void AddInstr(Instruction instruction)
@@ -71,6 +67,13 @@ namespace AdventOfCode
             {
                 return false;
             }
+
+            if (InstructionPointer >= Instructions.Count())
+            {
+                Completed = true;
+                return false;
+            }
+
             Executed.Add(InstructionPointer);
             var instr = Instructions.ElementAt(InstructionPointer);
 
@@ -93,6 +96,65 @@ namespace AdventOfCode
             return true;
         }
 
+        private int LastRepaired = -1;
+
+        public int Repair(int toRepair)
+        {
+            var instr = Instructions.ElementAt(toRepair);
+            switch (instr.InstructionCode)
+            {
+                case InstructionCode.Nop:
+                    instr.InstructionCode = InstructionCode.Jmp;
+                    return toRepair;
+                case InstructionCode.Acc:
+                    return Repair(toRepair + 1);
+                case InstructionCode.Jmp:
+                    instr.InstructionCode = InstructionCode.Nop;
+                    return toRepair;
+                default:
+                    return -1;
+            }
+        }
+
+        private void Restore()
+        {
+            var instr = Instructions.ElementAt(LastRepaired);
+            switch (instr.InstructionCode)
+            {
+                case InstructionCode.Nop:
+                    instr.InstructionCode = InstructionCode.Jmp;
+                    break;
+                case InstructionCode.Acc:
+                    break;
+                case InstructionCode.Jmp:
+                    instr.InstructionCode = InstructionCode.Nop;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void Reset()
+        {
+            Output = 0;
+            Executed = new HashSet<int>();
+            InstructionPointer = 0;
+        }
+
+        public void ResetAndRepair()
+        {
+            Reset();
+            Repair();
+        }
+        private void Repair()
+        {
+            if (LastRepaired != -1)
+            {
+                Restore();
+            }
+            LastRepaired = Repair(LastRepaired + 1);
+        }
+
         public int Run()
         {
             while (ExecuteOne())
@@ -106,7 +168,7 @@ namespace AdventOfCode
     public class Instruction
     {
 
-        public InstructionCode InstructionCode { get; private set; }
+        public InstructionCode InstructionCode { get; set; }
         public int InstructionValue { get; private set; }
         public Instruction(string input)
         {
