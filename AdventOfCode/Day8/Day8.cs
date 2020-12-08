@@ -9,7 +9,7 @@ namespace AdventOfCode
     {
         public static int Day8_1Solution()
         {
-            return ReadProgram().Run() ;
+            return ReadProgram().Run();
         }
 
         public static int Day8_2Solution()
@@ -23,7 +23,8 @@ namespace AdventOfCode
             using StreamReader inputFile = new StreamReader(@".\..\..\..\Day8\Input.txt");
             string line;
             ProgramDay8 p = new ProgramDay8();
-            while ((line = inputFile.ReadLine()) != null) {
+            while ((line = inputFile.ReadLine()) != null)
+            {
                 var instr = new Instruction(line);
                 p.AddInstr(instr);
             }
@@ -36,7 +37,19 @@ namespace AdventOfCode
         public List<Instruction> Instructions { get; private set; }
         public int Output { get; private set; }
         private HashSet<int> Executed;
-        private int InstructionPointer;
+        private int InstructionPointer
+        {
+            get
+            {
+                return InstructionPointer;
+            }
+            set
+            {
+                PreviousInstructionPointer = InstructionPointer;
+                InstructionPointer = value;
+            }
+        }
+        private int PreviousInstructionPointer;
 
         public ProgramDay8()
         {
@@ -44,6 +57,7 @@ namespace AdventOfCode
             Output = 0;
             Executed = new HashSet<int>();
             InstructionPointer = 0;
+            PreviousInstructionPointer = 0;
         }
 
         public void AddInstr(Instruction instruction)
@@ -57,6 +71,7 @@ namespace AdventOfCode
             {
                 return false;
             }
+            Executed.Add(InstructionPointer);
             var instr = Instructions.ElementAt(InstructionPointer);
 
             switch (instr.InstructionCode)
@@ -66,26 +81,30 @@ namespace AdventOfCode
                     break;
                 case InstructionCode.Acc:
                     Output += instr.InstructionValue;
+                    InstructionPointer++;
                     break;
-                case InstructionCode.Jump:
+                case InstructionCode.Jmp:
                     InstructionPointer += instr.InstructionValue;
                     break;
                 default:
                     break;
             }
+
             return true;
         }
 
         public int Run()
         {
-            while (ExecuteOne()) { 
+            while (ExecuteOne())
+            {
             }
             return Output;
         }
 
     }
 
-    public class Instruction {
+    public class Instruction
+    {
 
         public InstructionCode InstructionCode { get; private set; }
         public int InstructionValue { get; private set; }
@@ -96,7 +115,7 @@ namespace AdventOfCode
             acc +1*/
             var tokens = input.Split(' ');
 
-            InstructionCode = /*ParseEnum*/"";
+            InstructionCode = (InstructionCode)Enum.Parse(typeof(InstructionCode), tokens[0].ToString(), true);
             InstructionValue = Convert.ToInt32(tokens[1]);
         }
     }
@@ -105,7 +124,7 @@ namespace AdventOfCode
     {
         Nop,
         Acc,
-        Jump
+        Jmp
     }
 
 }
