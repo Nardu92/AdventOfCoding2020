@@ -10,12 +10,17 @@ namespace AdventOfCode
         public static long Day9_1Solution()
         {
             var nums = ReadInput();
-            var currentindex = 25;
+            return FindWeakness1(nums);
+        }
+
+        private static long FindWeakness1(long[] nums, int preambleLenght = 25)
+        {
+            var currentindex = preambleLenght;
             bool condition = false;
             do
             {
-                var start = currentindex - 25;
-                var finish = currentindex + 25;
+                var start = currentindex - preambleLenght;
+                var finish = currentindex;
                 var pair = FindPair(nums[currentindex], nums[start..finish].ToHashSet());
                 if (pair.Key == -1)
                 {
@@ -31,9 +36,49 @@ namespace AdventOfCode
             return nums[currentindex];
         }
 
-        public static int Day8_2Solution()
+        public static long Day9_2Solution()
         {
-            return 0;
+            var nums = ReadInput();
+            var sum = FindWeakness1(nums);
+            var condition = false;
+            var currentLenght = 2;
+            long[] solution;
+            do
+            {
+                solution = FindSubSet(sum, nums, currentLenght);
+                if (solution == null)
+                {
+                    currentLenght++;
+                }
+                else
+                {
+                    condition = true;
+                }
+            } while (!condition);
+            return solution.Min() + solution.Max();
+        }
+
+        private static long[] FindSubSet(long sum, long[]numbers, int lenghtOfTheSubset)
+        {
+
+            for (int i = 0; i < numbers.Length - lenghtOfTheSubset; i++)
+            {
+                long partialsum = 0;
+                for (int j = i; j < i + lenghtOfTheSubset; j++)
+                {
+                    partialsum += numbers[j];
+                }
+                if(partialsum> sum)
+                {
+                    break;
+                }
+                if (partialsum == sum)
+                {
+                    var endRange = i + lenghtOfTheSubset;
+                    return numbers[i..endRange];
+                }
+            }
+            return null;
         }
 
         private static KeyValuePair<long, long> FindPair(long sum, HashSet<long> set)
@@ -61,7 +106,6 @@ namespace AdventOfCode
                 nums.Add(Convert.ToInt64(line));
             }
             return nums.ToArray();
-
         }
     }
 }
