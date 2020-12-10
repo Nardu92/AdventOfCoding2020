@@ -10,10 +10,10 @@ namespace AdventOfCode
         public static long Day9_1Solution()
         {
             var nums = ReadInput();
-            return FindWeakness1(nums);
+            return FindWeakness(nums);
         }
 
-        private static long FindWeakness1(long[] nums, int preambleLenght = 25)
+        private static long FindWeakness(long[] nums, int preambleLenght = 25)
         {
             var currentindex = preambleLenght;
             bool condition = false;
@@ -39,8 +39,8 @@ namespace AdventOfCode
         public static long Day9_2Solution()
         {
             var nums = ReadInput();
-            var sum = FindWeakness1(nums);
-            var condition = false;
+            var sum = FindWeakness(nums);
+            var found = false;
             var currentLenght = 2;
             long[] solution;
             do
@@ -52,13 +52,13 @@ namespace AdventOfCode
                 }
                 else
                 {
-                    condition = true;
+                    found = true;
                 }
-            } while (!condition);
+            } while (!found);
             return solution.Min() + solution.Max();
         }
 
-        private static long[] FindSubSet(long sum, long[]numbers, int lenghtOfTheSubset)
+        private static long[] FindSubSet(long sum, long[] numbers, int lenghtOfTheSubset)
         {
 
             for (int i = 0; i < numbers.Length - lenghtOfTheSubset; i++)
@@ -68,7 +68,7 @@ namespace AdventOfCode
                 {
                     partialsum += numbers[j];
                 }
-                if(partialsum> sum)
+                if (partialsum > sum)
                 {
                     break;
                 }
@@ -97,7 +97,6 @@ namespace AdventOfCode
 
         private static long[] ReadInput()
         {
-            //bright white bags contain 5 muted tomato bags, 4 dotted gray bags, 3 posh gold bags.
             using StreamReader inputFile = new StreamReader(@".\..\..\..\Day9\Input.txt");
             string line;
             List<long> nums = new List<long>();
