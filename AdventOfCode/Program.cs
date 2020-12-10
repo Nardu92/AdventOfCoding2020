@@ -8,6 +8,8 @@ namespace AdventOfCode
         {
             var v = Day10.DaySolution2();
             Console.WriteLine(v);
+            
         }
     }
+
 }
