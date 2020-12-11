@@ -10,7 +10,7 @@ namespace AdventOfCode
     {
         public static long Solution1()
         {
-            var room = ReadInput();
+            var room = ReadInput(true);
 
             Console.WriteLine(room.ToString());
 
@@ -22,13 +22,18 @@ namespace AdventOfCode
             return room.GetOccupiedSeats();
         }
 
-        public static long DaySolution2()
+        public static long Solution2()
         {
-            return 0;
+            var room = ReadInput(false);
+            while (room.CalculateRound())
+            {
+                Console.WriteLine(room.ToString());
+            }
+            return room.GetOccupiedSeats();
         }
 
 
-        private static Room ReadInput()
+        private static Room ReadInput(bool rule1)
         {
             using StreamReader inputFile = new StreamReader(@".\..\..\..\Day11\Input.txt");
             string line;
@@ -37,19 +42,20 @@ namespace AdventOfCode
             {
                 lines.Add(line);
             }
-            return new Room(lines.ToArray());
+            return new Room(lines.ToArray(), rule1);
         }
     }
 
     public class Room
     {
         Seat[][] Seats;
-
-        public Room(string[] roomLayout)
+        bool Rule1;
+        public Room(string[] roomLayout, bool rule1)
         {
             var roomHeight = roomLayout.Length;
             var roomWidth = roomLayout.First().Length;
             Seats = new Seat[roomHeight][];
+            Rule1 = rule1;
             for (int y = 0; y < roomHeight; y++)
             {
                 Seats[y] = new Seat[roomWidth];
@@ -58,65 +64,77 @@ namespace AdventOfCode
                     Seats[y][x] = new Seat(roomLayout[y][x]);
                 }
             }
+            BuildAdjecents(rule1);
+        }
 
+        private void BuildAdjecents(bool rule1)
+        {
+            var roomHeight = Seats.Length;
+            var roomWidth = Seats.First().Length;
             for (int y = 0; y < roomHeight; y++)
             {
                 for (int x = 0; x < roomWidth; x++)
                 {
                     var currentSeat = Seats[y][x];
+                    if(currentSeat.Type == SeatType.Floor)
+                    {
+                        continue;
+                    }
                     var adjecents = new List<Seat>();
-                    if (y > 0 && x < roomWidth - 1)
-                    {
-                        Seat upRight = Seats[y - 1][x + 1];
-                        if (upRight.Type != SeatType.Floor)
-                            adjecents.Add(upRight);
-                    }
-                    if (x < roomWidth - 1)
-                    {
-                        Seat right = Seats[y][x + 1];
-                        if (right.Type != SeatType.Floor)
-                            adjecents.Add(right);
-                    }
-                    if (y < roomHeight - 1 && x < roomWidth - 1)
-                    {
-                        Seat downRight = Seats[y + 1][x + 1];
-                        if (downRight.Type != SeatType.Floor)
-                            adjecents.Add(downRight);
-                    }
-                    if (y < roomHeight - 1)
-                    {
-                        Seat down = Seats[y + 1][x];
-                        if (down.Type != SeatType.Floor)
-                            adjecents.Add(down);
-                    }
-                    if (y < roomHeight - 1 && x > 0)
-                    {
-                        Seat downLeft = Seats[y + 1][x - 1];
-                        if (downLeft.Type != SeatType.Floor)
-                            adjecents.Add(downLeft);
-                    }
-                    if (x > 0)
-                    {
-                        Seat left = Seats[y][x - 1];
-                        if (left.Type != SeatType.Floor)
-                            adjecents.Add(left);
-                    }
-                    if (y > 0 && x > 0)
-                    {
-                        Seat upLeft = Seats[y - 1][x - 1];
-                        if (upLeft.Type != SeatType.Floor)
-                            adjecents.Add(upLeft);
-                    }
-                    if (y > 0)
-                    {
-                        Seat up = Seats[y - 1][x];
-                        if (up.Type != SeatType.Floor)
-                            adjecents.Add(up);
-                    }
+                    //upRight
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, 1, -1);
+
+                    //Right
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, 1, 0);
+
+                    //Down Right
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, 1, 1);
+
+                    //Down
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, 0, 1);
+
+                    //Down Left
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, -1, 1);
+
+                    //Left
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, -1, 0);
+
+                    //Up Left
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, -1, -1);
+
+                    //Up
+                    CalculateAdjecent(roomHeight, roomWidth, adjecents, y, x, 0, -1);
+
                     currentSeat.AdjecentSeats = adjecents;
                 }
             }
+        }
 
+        private void CalculateAdjecent(int roomHeight, int roomWidth, List<Seat> adjecents, int initialY, int initialX, int xDirection, int yDirection)
+        {
+            var repeat = false;
+            do
+            {
+                initialX += xDirection;
+                initialY += yDirection;
+                if (initialY >= 0 && initialY <= roomHeight - 1 && initialX >= 0 && initialX <= roomWidth - 1)
+                {
+                    Seat upRight = Seats[initialY][initialX];
+                    if (upRight.Type != SeatType.Floor)
+                    {
+                        repeat = false;
+                        adjecents.Add(upRight);
+                    }
+                    else if (!Rule1)
+                    {
+                        repeat = true;
+                    }
+                }
+                else
+                {
+                    repeat = false;
+                }
+            } while (repeat);
         }
 
         public bool CalculateRound()
@@ -125,7 +143,7 @@ namespace AdventOfCode
             {
                 foreach (var seat in row)
                 {
-                    seat.CalculateRound();
+                    seat.CalculateRound(Rule1 ? 4: 5);
                 }
             }
             bool somethingChanged = false;
@@ -157,7 +175,7 @@ namespace AdventOfCode
 
         public int GetOccupiedSeats()
         {
-            return  Seats.SelectMany(x => x).Count(s => s.Occupied);
+            return Seats.SelectMany(x => x).Count(s => s.Occupied);
         }
     }
 
@@ -185,7 +203,7 @@ namespace AdventOfCode
         }
 
         bool nextState = false;
-        public void CalculateRound()
+        public void CalculateRound(int limit)
         {
             if (this.Type == SeatType.Seat)
             {
@@ -196,7 +214,7 @@ namespace AdventOfCode
                     return;
                 }
                 //If a seat is occupied (#) and four or more seats adjacent to it are also occupied, the seat becomes empty.
-                if (Occupied && AdjecentSeats.Count(x => x.Occupied) >= 4)
+                if (Occupied && AdjecentSeats.Count(x => x.Occupied) >= limit)
                 {
                     nextState = false;
                     return;
