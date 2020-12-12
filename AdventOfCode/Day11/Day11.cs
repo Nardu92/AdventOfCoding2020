@@ -12,11 +12,9 @@ namespace AdventOfCode
         {
             var room = ReadInput(true);
 
-            Console.WriteLine(room.ToString());
 
             while (room.CalculateRound())
             {
-                Console.WriteLine(room.ToString());
             }
 
             return room.GetOccupiedSeats();
@@ -27,7 +25,6 @@ namespace AdventOfCode
             var room = ReadInput(false);
             while (room.CalculateRound())
             {
-                Console.WriteLine(room.ToString());
             }
             return room.GetOccupiedSeats();
         }
