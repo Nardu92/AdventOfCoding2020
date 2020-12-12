@@ -6,9 +6,10 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            var v = Day11.Solution2();
+            var v = Day12.Solution1();
             Console.WriteLine(v);
-            
+            v = Day12.Solution2();
+            Console.WriteLine(v);
         }
     }
 
