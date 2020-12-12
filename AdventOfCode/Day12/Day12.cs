@@ -11,18 +11,20 @@ namespace AdventOfCode
     {
         public static long Solution1()
         {
-            var route = ReadInput(false);
-
+            var lines = ReadInput();
+            var route = new Route(lines);
             return Math.Abs(route.Destination.X) + Math.Abs(route.Destination.Y);
         }
 
         public static long Solution2()
         {
-            return 0;
+            var lines = ReadInput();
+            var route = new RouteWithWaypoint(lines);
+            return Math.Abs(route.Destination.X) + Math.Abs(route.Destination.Y);
         }
 
 
-        private static Route ReadInput(bool rule2)
+        private static List<string> ReadInput()
         {
             using StreamReader inputFile = new StreamReader(@".\..\..\..\Day12\Input.txt");
             string line;
@@ -31,26 +33,77 @@ namespace AdventOfCode
             {
                 lines.Add(line);
             }
-            return new Route(lines);
+            return lines;
         }
     }
     public class RouteWithWaypoint
     {
-        public Segment[] Segments { get; private set; }
+        private Point Waypoint;
+
+        private Point Position;
 
         public RouteWithWaypoint(List<string> input)
         {
-            var l = new List<Segment>();
-            l.Add(new Segment(OrientationEnum.E));
-            foreach (string segmentString in input)
+            Waypoint = new Point(10, 1);
+            Position = new Point(0, 0);
+            foreach (string command in input)
             {
-                l.Add(new Segment(segmentString, l.LastOrDefault()));
-            }
+                OrientationEnum orientation = (OrientationEnum)Enum.Parse(typeof(OrientationEnum), command[0].ToString());
+                int length = Convert.ToInt32(command[1..]);
+                ChangeWaypoint(orientation, length);
 
-            Segments = l.ToArray();
+                if (orientation == OrientationEnum.F)
+                {
+                    for (int i = 0; i < length; i++)
+                    {
+                        Position.X += Waypoint.X;
+                        Position.Y += Waypoint.Y;
+                    }
+                }
+            }
         }
 
-        public Point Destination => Segments.Last().End;
+        private void ChangeWaypoint(OrientationEnum orientation, int length)
+        {
+            switch (orientation)
+            {
+                case OrientationEnum.N:
+                    Waypoint.Y = Waypoint.Y + length;
+                    break;
+                case OrientationEnum.E:
+                    Waypoint.X = Waypoint.X + length;
+                    break;
+                case OrientationEnum.S:
+                    Waypoint.Y = Waypoint.Y - length;
+                    break;
+                case OrientationEnum.W:
+                    Waypoint.X = Waypoint.X - length;
+                    break;
+                case OrientationEnum.L:
+                    RotateWaypoint(length);
+                    break;
+                case OrientationEnum.R:
+                    RotateWaypoint(-length);
+                    break;
+                case OrientationEnum.F:
+                default:
+                    break;
+            }
+        }
+
+        private void RotateWaypoint(int angleDegrees)
+        {
+            double angle = (double)angleDegrees / 180 * Math.PI;
+            var sin = (int)Math.Sin(angle);
+            var cos = (int)Math.Cos(angle);
+
+            var xnew = Waypoint.X * cos - Waypoint.Y * sin;
+            var ynew = Waypoint.X * sin + Waypoint.Y * cos;
+
+            Waypoint.X = xnew;
+            Waypoint.Y = ynew;
+        }
+        public Point Destination => Position;
     }
 
     public class Route
@@ -65,7 +118,7 @@ namespace AdventOfCode
             {
                 l.Add(new Segment(segmentString, l.LastOrDefault()));
             }
-            
+
             Segments = l.ToArray();
         }
 
@@ -95,6 +148,12 @@ namespace AdventOfCode
             End = new Point(0, 0);
 
         }
+
+        public Segment(Point waypoint, Segment previousSegment)
+        {
+
+        }
+
         public Segment(string segment, Segment previousSegment)
         {
             Orientation = (OrientationEnum)Enum.Parse(typeof(OrientationEnum), segment[0].ToString());
