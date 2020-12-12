@@ -34,7 +34,24 @@ namespace AdventOfCode
             return new Route(lines);
         }
     }
+    public class RouteWithWaypoint
+    {
+        public Segment[] Segments { get; private set; }
 
+        public RouteWithWaypoint(List<string> input)
+        {
+            var l = new List<Segment>();
+            l.Add(new Segment(OrientationEnum.E));
+            foreach (string segmentString in input)
+            {
+                l.Add(new Segment(segmentString, l.LastOrDefault()));
+            }
+
+            Segments = l.ToArray();
+        }
+
+        public Point Destination => Segments.Last().End;
+    }
 
     public class Route
     {
@@ -53,9 +70,6 @@ namespace AdventOfCode
         }
 
         public Point Destination => Segments.Last().End;
-
-        public IEnumerable<Segment> OrizontalSegments => Segments.Where(x => x.Direction == Direction.Orizontal);
-        public IEnumerable<Segment> VerticalSegments => Segments.Where(x => x.Direction == Direction.Vertical);
     }
 
     public class Segment
@@ -64,10 +78,10 @@ namespace AdventOfCode
 
         public OrientationEnum MovingOrientation { get; private set; }
 
-        public Direction Direction => Orientation == OrientationEnum.E || Orientation == OrientationEnum.W ? Direction.Orizontal : Direction.Vertical;
         public int Lenght { get; private set; }
 
         public Point Start { get; private set; }
+
         public Point End { get; private set; }
 
         public Segment PreviousSegment { get; private set; }
@@ -176,11 +190,5 @@ namespace AdventOfCode
         L,
         R,
         F
-    }
-
-    public enum Direction
-    {
-        Vertical,
-        Orizontal,
     }
 }
