@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using System.Linq;
 
 namespace AdventOfCode2020_Tests
 {
@@ -12,7 +13,7 @@ namespace AdventOfCode2020_Tests
         {
             Mask m = new Mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X");
             var actual = m.ApplyMask(11);
-            var expected = 73;
+            long expected = 73;
             Assert.Equal(expected, actual);
         }
 
@@ -21,7 +22,7 @@ namespace AdventOfCode2020_Tests
         {
             Mask m = new Mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X");
             var actual = m.ApplyMask(101);
-            var expected = 101;
+            long expected = 101;
             Assert.Equal(expected, actual);
         }
 
@@ -30,7 +31,7 @@ namespace AdventOfCode2020_Tests
         {
             Mask m = new Mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X");
             var actual = m.ApplyMask(0);
-            var expected = 64;
+            long expected = 64;
             Assert.Equal(expected, actual);
         }
 
@@ -40,7 +41,7 @@ namespace AdventOfCode2020_Tests
             var stringMask = "X11001110001101XX01111X1001X01101111";
             Mask m = new Mask(stringMask);
             var actual = m.ApplyMask(0);
-            var expected = Convert.ToInt64(stringMask.Replace('X', '0'), 2);
+            long expected = Convert.ToInt64(stringMask.Replace('X', '0'), 2);
             Assert.Equal(expected, actual);
         }
 
@@ -63,7 +64,7 @@ namespace AdventOfCode2020_Tests
                 "mem[59015] = 3487205",
                 "mem[25831] = 33360",
                 "mem[62711] = 224797",
-                "mem[41307] = 1818" 
+                "mem[41307] = 1818"
             };
 
             var maskProgram = new MaskProgram(input);
@@ -71,16 +72,8 @@ namespace AdventOfCode2020_Tests
         }
 
         [Fact]
-        private static void TestFirstProgramSection()
+        private static void TestMasking()
         {
-            List<string> input = new List<string>(){
-                "mask = X11001110001101XX01111X1001X01101111",
-                "mem[32163] = 23587",
-                "mem[59015] = 3487205",
-                "mem[25831] = 33360",
-                "mem[62711] = 224797",
-                "mem[41307] = 1818"
-            };
             var mask = new Mask("mask = X11001110001101XX01111X1001X01101111");
             //mask    X11001110001101XX01111X1001X01101111
             //23587   000000000000000000000101110000100011
@@ -113,6 +106,37 @@ namespace AdventOfCode2020_Tests
             Assert.Equal(27676365679, mask.ApplyMask(mem.ValueToSet));
         }
 
+
+        [Fact]
+        private static void TestMaskingWithHugeNumbers()
+        {
+            var mask = new Mask("mask = 1010001X010111X00101X1X101X1X01010X0");
+            //mask         X11001110001101XX01111X1001X01101111
+            //68719476735  111111111111111111111111111111111111
+            //masked       111001110001101110111111001101101111
+            //43853936554  101000110101111001011111011110101010
+            //something weird is going on here
+            var mem = new MemoryAccess("mem[45083] = 68719476735");
+            Assert.Equal(43853936554, Convert.ToInt64(mask.ApplyMask(mem.ValueToSet)));
+        }
+
+        [Fact]
+        private static void TestFirstProgramSection()
+        {
+            var mask = new Mask("mask = X11001110001101XX01111X1001X01101111");
+            var ps = new ProgramSection(mask);
+            ps.AddMemory(new MemoryAccess("mem[32163] = 23587"));
+            ps.AddMemory(new MemoryAccess("mem[59015] = 3487205"));
+            ps.AddMemory(new MemoryAccess("mem[25831] = 33360"));
+            ps.AddMemory(new MemoryAccess("mem[62711] = 224797"));
+            ps.AddMemory(new MemoryAccess("mem[41307] = 1818"));
+
+            var result = ps.ApplyChanges();
+            long actual = result.Values.Sum();
+            long expected = 27676365423 + 27677422447 + 27676365423 + 27676373615 + 27676365679;
+            Assert.Equal(expected, actual);
+        }
+
         [Fact]
         private static void TestCreateProgramSections2()
         {
@@ -126,7 +150,7 @@ namespace AdventOfCode2020_Tests
                 "mask = X11001110001101XX01111X1001X01101111",
                 "mem[62711] = 224797",
                 "mask = X11001110001101XX01111X1001X01101111",
-                "mem[41307] = 1818" 
+                "mem[41307] = 1818"
             };
 
 
@@ -138,8 +162,16 @@ namespace AdventOfCode2020_Tests
         private static void TestMemoryAddressDeserialization()
         {
             MemoryAccess m = new MemoryAccess("mem[22316] = 982");
-            Assert.Equal(982, m.ValueToSet);
-            Assert.Equal(22316, m.MemoryAddress);
+            Assert.Equal(982, Convert.ToInt64(m.ValueToSet));
+            Assert.Equal(22316, Convert.ToInt64(m.MemoryAddress));
+        }
+
+        [Fact]
+        private static void TestSolution1()
+        {
+            var actual = Day14.Solution1(@".\..\..\..\..\AdventOfCode\Day14\Input.txt");
+            var expected = 15018100062885;
+            Assert.Equal(expected, actual);
         }
 
     }
