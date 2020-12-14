@@ -12,11 +12,11 @@ namespace AdventOfCode
     {
         public static long Solution1()
         {
-            var l = CreateProgramSections(ReadInput());
+            var l = new MaskProgram(ReadInput());
 
-            var res = ExecuteProgram(l);
+            l.ExecuteProgram();
 
-            return CalculateTotalValues(res);
+            return l.CalculateTotalValues();
         }
 
 
@@ -37,9 +37,15 @@ namespace AdventOfCode
             return lines;
         }
 
-        private static List<ProgramSection> CreateProgramSections(List<string> input)
+    }
+
+    public class MaskProgram
+    {
+        public List<ProgramSection> ProgramSections { get; private set; }
+        Dictionary<int, long> ValuesByMemoryAddress;
+        public  MaskProgram(List<string> input)
         {
-            List<ProgramSection> programSections = new List<ProgramSection>();
+            ProgramSections = new List<ProgramSection>();
             Mask mask;
             ProgramSection programSection = null;
             foreach (var str in input)
@@ -52,79 +58,29 @@ namespace AdventOfCode
                 {
                     mask = new Mask(str);
                     programSection = new ProgramSection(mask);
-                    programSections.Add(programSection);
+                    ProgramSections.Add(programSection);
                 }
             }
-            return programSections;
         }
 
-        private static Dictionary<int, long> ExecuteProgram(List<ProgramSection> programSections)
+        public void ExecuteProgram()
         {
-            Dictionary<int, long> valuesByMemoryAddress = new Dictionary<int, long>();
-            foreach (var program in programSections)
+            ValuesByMemoryAddress = new Dictionary<int, long>();
+            foreach (var program in ProgramSections)
             {
                 var partialMem = program.ApplyChanges();
                 foreach (var item in partialMem)
                 {
-                    valuesByMemoryAddress[item.Key] = item.Value;
+                    ValuesByMemoryAddress[item.Key] = item.Value;
                 }
             }
-            return valuesByMemoryAddress;
         }
 
-        private static long CalculateTotalValues(Dictionary<int, long> valuesByMemoryAddress)
+        public long CalculateTotalValues()
         {
-            return valuesByMemoryAddress.Sum(x => x.Value);
+            return ValuesByMemoryAddress.Sum(x => x.Value);
         }
-
-        private static void TestMask1()
-        {
-            Mask m = new Mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X");
-            var actual = m.ApplyMask(11);
-            var expected = 73;
-            if (actual != expected)
-            {
-                throw new Exception();
-            }
-        }
-
-        private static void TestMask2()
-        {
-            Mask m = new Mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X");
-            var actual = m.ApplyMask(101);
-            var expected = 101;
-            if (actual != expected)
-            {
-                throw new Exception();
-            }
-        }
-
-        private static void TestMask3()
-        {
-            Mask m = new Mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X");
-            var actual = m.ApplyMask(0);
-            var expected = 64;
-            if (actual != expected)
-            {
-                throw new Exception();
-            }
-        }
-
-        private static void TestMemoryAddress1()
-        {
-            MemoryAccess m = new MemoryAccess("mem[22316] = 982");
-            if (m.ValueToSet != 982)
-            {
-                throw new Exception();
-            }
-            if (m.MemoryAddress != 22316)
-            {
-                throw new Exception();
-            }
-        }
-
     }
-
     public class Mask
     {
         private Dictionary<int, bool> Bits;
@@ -186,7 +142,7 @@ namespace AdventOfCode
             var lastIndexOfMA = input.IndexOf(']');
             var firsIndexOfValue = input.IndexOf('=') + 2;
             this.MemoryAddress = Convert.ToInt32(input[4..lastIndexOfMA]);
-            this.ValueToSet = Convert.ToInt32(input[firsIndexOfValue..]);
+            this.ValueToSet = Convert.ToInt64(input[firsIndexOfValue..]);
         }
     }
 
