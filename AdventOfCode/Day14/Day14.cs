@@ -12,17 +12,17 @@ namespace AdventOfCode
     {
         public static long Solution1(string fileName = @".\..\..\..\Day14\Input.txt")
         {
-            var l = new MaskProgram(ReadInput(fileName));
-
-            l.ExecuteProgram();
-
-            return l.CalculateTotalValues();
+            var prog = new MaskProgram(ReadInput(fileName), true);
+            prog.ExecuteProgram();
+            return prog.CalculateTotalValues();
         }
 
 
-        public static long Solution2()
+        public static long Solution2(string fileName = @".\..\..\..\Day14\Input.txt")
         {
-            return 0;
+            var prog = new MaskProgram(ReadInput(fileName), false);
+            prog.ExecuteProgram();
+            return prog.CalculateTotalValues();
         }
 
         private static List<string> ReadInput(string fileName)
@@ -41,13 +41,12 @@ namespace AdventOfCode
 
     public class MaskProgram
     {
-        public List<ProgramSection> ProgramSections { get; private set; }
+        public List<IProgramSection> ProgramSections { get; private set; }
         Dictionary<long, long> ValuesByMemoryAddress;
-        public  MaskProgram(List<string> input)
+        public MaskProgram(List<string> input, bool sol1)
         {
-            ProgramSections = new List<ProgramSection>();
-            Mask mask;
-            ProgramSection programSection = null;
+            ProgramSections = new List<IProgramSection>();
+            IProgramSection programSection = null;
             foreach (var str in input)
             {
                 if (str.Contains('['))
@@ -56,8 +55,16 @@ namespace AdventOfCode
                 }
                 else
                 {
-                    mask = new Mask(str);
-                    programSection = new ProgramSection(mask);
+                    if (sol1)
+                    {
+                        Mask mask = new Mask(str);
+                        programSection = new ProgramSection(mask);
+                    }
+                    else
+                    {
+                        var memoryMask = new MemoryMask(str);
+                        programSection = new ProgramSectionAddressMask(memoryMask);
+                    }
                     ProgramSections.Add(programSection);
                 }
             }
@@ -68,7 +75,7 @@ namespace AdventOfCode
             ValuesByMemoryAddress = new Dictionary<long, long>();
             foreach (var program in ProgramSections)
             {
-                
+
                 var partialMem = program.ApplyChanges();
                 foreach (var item in partialMem)
                 {
@@ -95,10 +102,12 @@ namespace AdventOfCode
                 if (c == 'X')
                 {
                     continue;
-                }else if(c == '0')
+                }
+                else if (c == '0')
                 {
                     Bits[maskValue.Length - i - 1] = false;
-                } else if(c == '1')
+                }
+                else if (c == '1')
                 {
                     Bits[maskValue.Length - i - 1] = true;
                 }
@@ -108,10 +117,10 @@ namespace AdventOfCode
         public long ApplyMask(long value)
         {
             List<char> reversedNewString = new List<char>();
-            var binarystring  = Convert.ToString(value, toBase: 2).PadLeft(36, '0');
-            for (int i = binarystring.Length - 1; i >= 0 ; i--)
+            var binarystring = Convert.ToString(value, toBase: 2).PadLeft(36, '0');
+            for (int i = binarystring.Length - 1; i >= 0; i--)
             {
-                if(Bits.TryGetValue(binarystring.Length - i - 1, out bool maskbit))
+                if (Bits.TryGetValue(binarystring.Length - i - 1, out bool maskbit))
                 {
                     reversedNewString.Add(maskbit ? '1' : '0');
                 }
@@ -127,6 +136,67 @@ namespace AdventOfCode
         }
     }
 
+    public class MemoryMask
+    {
+        private Dictionary<int, bool> Bits;
+
+        public MemoryMask(string maskValue)
+        {
+            Bits = new Dictionary<int, bool>();
+            for (int i = maskValue.Length - 1; i >= 0; i--)
+            {
+                char c = maskValue[i];
+                if (c == '0')
+                {
+                    continue;
+                }
+                else if (c == 'X')
+                {
+                    Bits[maskValue.Length - i - 1] = false;
+                }
+                else if (c == '1')
+                {
+                    Bits[maskValue.Length - i - 1] = true;
+                }
+            }
+        }
+
+        public List<long> ApplyMask(long value)
+        {
+            List<char> reversedNewString = new List<char>();
+            var binarystring = Convert.ToString(value, toBase: 2).PadLeft(36, '0');
+            for (int i = binarystring.Length - 1; i >= 0; i--)
+            {
+                if (Bits.TryGetValue(binarystring.Length - i - 1, out bool maskbit))
+                {
+                    reversedNewString.Add(maskbit ? '1' : 'X');
+                }
+                else
+                {
+                    reversedNewString.Add(binarystring[i]);
+                }
+            }
+            var sb = new StringBuilder();
+            reversedNewString.Reverse();
+            reversedNewString.ForEach(x => sb.Append(x));
+            return TransformFloatingAddress(sb.ToString());
+        }
+
+        public List<long> TransformFloatingAddress(string floatingAddress)
+        {
+            if (!floatingAddress.Contains("X"))
+                return new List<long>() { Convert.ToInt64(floatingAddress, 2) };
+
+            var index = floatingAddress.IndexOf("X");
+
+            string withOne = floatingAddress[..index] + "1" + floatingAddress[(index + 1)..];
+            string withZero = floatingAddress[..index] + "0" + floatingAddress[(index + 1)..];
+
+            var result = TransformFloatingAddress(withOne);
+            result.AddRange(TransformFloatingAddress(withZero));
+            return result;
+        }
+    }
     public class MemoryAccess
     {
         public long MemoryAddress;
@@ -147,7 +217,13 @@ namespace AdventOfCode
         }
     }
 
-    public class ProgramSection
+    public interface IProgramSection
+    {
+        void AddMemory(MemoryAccess ma);
+        Dictionary<long, long> ApplyChanges();
+    }
+
+    public class ProgramSection : IProgramSection
     {
         List<MemoryAccess> MemoryAccesses;
         Mask Mask;
@@ -174,7 +250,39 @@ namespace AdventOfCode
             Dictionary<long, long> valueByMemoryAddress = new Dictionary<long, long>();
             foreach (var mem in MemoryAccesses)
             {
-                valueByMemoryAddress[Convert.ToInt64(mem.MemoryAddress)] = Convert.ToInt64(Mask.ApplyMask(mem.ValueToSet));
+                valueByMemoryAddress[mem.MemoryAddress] = Mask.ApplyMask(mem.ValueToSet);
+            }
+            return valueByMemoryAddress;
+        }
+
+    }
+
+    public class ProgramSectionAddressMask : IProgramSection
+    {
+        List<MemoryAccess> MemoryAccesses;
+        MemoryMask Mask;
+
+        public ProgramSectionAddressMask(MemoryMask mask)
+        {
+            this.MemoryAccesses = new List<MemoryAccess>();
+            this.Mask = mask;
+        }
+
+        public void AddMemory(MemoryAccess ma)
+        {
+            this.MemoryAccesses.Add(ma);
+        }
+
+        public Dictionary<long, long> ApplyChanges()
+        {
+            Dictionary<long, long> valueByMemoryAddress = new Dictionary<long, long>();
+            foreach (var mem in MemoryAccesses)
+            {
+                var addresses = Mask.ApplyMask(mem.MemoryAddress);
+                foreach (var address in addresses)
+                {
+                    valueByMemoryAddress[address] = mem.ValueToSet;
+                }
             }
             return valueByMemoryAddress;
         }

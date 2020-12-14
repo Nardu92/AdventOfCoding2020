@@ -67,7 +67,7 @@ namespace AdventOfCode2020_Tests
                 "mem[41307] = 1818"
             };
 
-            var maskProgram = new MaskProgram(input);
+            var maskProgram = new MaskProgram(input, true);
             Assert.Single(maskProgram.ProgramSections);
         }
 
@@ -154,7 +154,7 @@ namespace AdventOfCode2020_Tests
             };
 
 
-            var maskProgram = new MaskProgram(input);
+            var maskProgram = new MaskProgram(input, true);
             Assert.Equal(5, maskProgram.ProgramSections.Count);
         }
 
@@ -172,6 +172,27 @@ namespace AdventOfCode2020_Tests
             var actual = Day14.Solution1(@".\..\..\..\..\AdventOfCode\Day14\Input.txt");
             var expected = 15018100062885;
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        private static void TestSolution2()
+        {
+            var actual = Day14.Solution2(@".\..\..\..\..\AdventOfCode\Day14\Input.txt");
+            var expected = 5724245857696;
+            Assert.Equal(expected, actual);
+        }
+        
+
+        [Fact]
+        public static void TestMemoryMask()
+        {
+            MemoryMask mm = new MemoryMask("000000000000000000000000000000X1001X");
+            var res = mm.ApplyMask(42);
+            Assert.Equal(4, res.Count);
+            Assert.Contains(26, res);
+            Assert.Contains(27, res);
+            Assert.Contains(58, res);
+            Assert.Contains(59, res);
         }
 
     }
