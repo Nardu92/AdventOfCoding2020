@@ -10,9 +10,9 @@ namespace AdventOfCode
 {
     public class Day14
     {
-        public static long Solution1()
+        public static long Solution1(string fileName = @".\..\..\..\Day14\Input.txt")
         {
-            var l = new MaskProgram(ReadInput());
+            var l = new MaskProgram(ReadInput(fileName));
 
             l.ExecuteProgram();
 
@@ -25,9 +25,9 @@ namespace AdventOfCode
             return 0;
         }
 
-        private static List<string> ReadInput()
+        private static List<string> ReadInput(string fileName)
         {
-            using StreamReader inputFile = new StreamReader(@".\..\..\..\Day14\Input.txt");
+            using StreamReader inputFile = new StreamReader(fileName);
             string line;
             List<string> lines = new List<string>();
             while ((line = inputFile.ReadLine()) != null)
@@ -42,7 +42,7 @@ namespace AdventOfCode
     public class MaskProgram
     {
         public List<ProgramSection> ProgramSections { get; private set; }
-        Dictionary<int, long> ValuesByMemoryAddress;
+        Dictionary<long, long> ValuesByMemoryAddress;
         public  MaskProgram(List<string> input)
         {
             ProgramSections = new List<ProgramSection>();
@@ -65,9 +65,10 @@ namespace AdventOfCode
 
         public void ExecuteProgram()
         {
-            ValuesByMemoryAddress = new Dictionary<int, long>();
+            ValuesByMemoryAddress = new Dictionary<long, long>();
             foreach (var program in ProgramSections)
             {
+                
                 var partialMem = program.ApplyChanges();
                 foreach (var item in partialMem)
                 {
@@ -78,7 +79,7 @@ namespace AdventOfCode
 
         public long CalculateTotalValues()
         {
-            return ValuesByMemoryAddress.Sum(x => x.Value);
+            return ValuesByMemoryAddress.Values.Sum();
         }
     }
     public class Mask
@@ -88,7 +89,7 @@ namespace AdventOfCode
         public Mask(string maskValue)
         {
             Bits = new Dictionary<int, bool>();
-            for (int i = maskValue.Length - 1; i > 0; i--)
+            for (int i = maskValue.Length - 1; i >= 0; i--)
             {
                 char c = maskValue[i];
                 if (c == 'X')
@@ -108,7 +109,7 @@ namespace AdventOfCode
         {
             List<char> reversedNewString = new List<char>();
             var binarystring  = Convert.ToString(value, toBase: 2).PadLeft(36, '0');
-            for (int i = binarystring.Length - 1; i > 0 ; i--)
+            for (int i = binarystring.Length - 1; i >= 0 ; i--)
             {
                 if(Bits.TryGetValue(binarystring.Length - i - 1, out bool maskbit))
                 {
@@ -128,9 +129,9 @@ namespace AdventOfCode
 
     public class MemoryAccess
     {
-        public int MemoryAddress;
+        public long MemoryAddress;
         public long ValueToSet;
-        public MemoryAccess(int memoryAddress, long valueToSet)
+        public MemoryAccess(long memoryAddress, long valueToSet)
         {
             this.MemoryAddress = memoryAddress;
             this.ValueToSet = valueToSet;
@@ -141,7 +142,7 @@ namespace AdventOfCode
             //mem[22316] = 982
             var lastIndexOfMA = input.IndexOf(']');
             var firsIndexOfValue = input.IndexOf('=') + 2;
-            this.MemoryAddress = Convert.ToInt32(input[4..lastIndexOfMA]);
+            this.MemoryAddress = Convert.ToInt64(input[4..lastIndexOfMA]);
             this.ValueToSet = Convert.ToInt64(input[firsIndexOfValue..]);
         }
     }
@@ -168,12 +169,12 @@ namespace AdventOfCode
             this.MemoryAccesses.Add(ma);
         }
 
-        public Dictionary<int, long> ApplyChanges()
+        public Dictionary<long, long> ApplyChanges()
         {
-            Dictionary<int, long> valueByMemoryAddress = new Dictionary<int, long>();
+            Dictionary<long, long> valueByMemoryAddress = new Dictionary<long, long>();
             foreach (var mem in MemoryAccesses)
             {
-                valueByMemoryAddress[mem.MemoryAddress] = Mask.ApplyMask(mem.ValueToSet);
+                valueByMemoryAddress[Convert.ToInt64(mem.MemoryAddress)] = Convert.ToInt64(Mask.ApplyMask(mem.ValueToSet));
             }
             return valueByMemoryAddress;
         }
