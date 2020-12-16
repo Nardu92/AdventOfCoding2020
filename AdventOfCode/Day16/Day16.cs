@@ -16,7 +16,7 @@ namespace AdventOfCode
             var input = ReadInput(fileName);
             foreach (var passport in input.CryptPassports)
             {
-                foreach(var value in passport.Values)
+                foreach (var value in passport.Values)
                 {
                     var a = input.ValueValidForField(value);
                     if (string.IsNullOrEmpty(a))
@@ -31,7 +31,99 @@ namespace AdventOfCode
 
         public static long Solution2(string fileName = @".\..\..\..\Day16\Input.txt")
         {
-            return 0;
+
+            var input = ReadInput(fileName);
+            List<CryptPassport> validPasses = GetValidPassports(input);
+
+            Dictionary<int, List<int>> valuesByFieldPositionInPassport = GetValuesGroupedByPosition(validPasses);
+            Dictionary<int, HashSet<string>> validFieldsByPosition = GetListOfPossibleFieldsByPosition(input, valuesByFieldPositionInPassport);
+            Dictionary<string, int> positionByFieldName = GetPositionByFieldName(validPasses, validFieldsByPosition);
+
+            long answer = 1;
+            foreach (KeyValuePair<string, int> field in positionByFieldName.Where(x => x.Key.StartsWith("departure")))
+            {
+                answer *= input.MyPassport.Values.ElementAt(field.Value);
+            }
+            return answer;
+        }
+
+        private static Dictionary<string, int> GetPositionByFieldName(List<CryptPassport> validPasses, Dictionary<int, HashSet<string>> validFieldsByPosition)
+        {
+            var positionByFieldName = new Dictionary<string, int>();
+            var numberOfFieldsInAPassport = validPasses.First().Values.Count;
+            for (int i = 0; i < numberOfFieldsInAPassport; i++)
+            {
+                var sureGuess = validFieldsByPosition.Single(x => x.Value.Count == 1);
+                var passportFieldName = sureGuess.Value.First();
+                positionByFieldName[passportFieldName] = sureGuess.Key;
+                foreach (KeyValuePair<int, HashSet<string>> kvp in validFieldsByPosition)
+                {
+                    kvp.Value.Remove(passportFieldName);
+                }
+            }
+
+            return positionByFieldName;
+        }
+
+        private static Dictionary<int, HashSet<string>> GetListOfPossibleFieldsByPosition(InputClass input, Dictionary<int, List<int>> valuesByFieldPositionInPassport)
+        {
+            //All the fields key
+            var allFieldsKeys = input.PassportFields.Select(x => x.Name).ToList();
+            Dictionary<int, HashSet<string>> validFieldsByPosition = new Dictionary<int, HashSet<string>>();
+            foreach (KeyValuePair<int, List<int>> kvp in valuesByFieldPositionInPassport)
+            {
+                var validFieldsAtPosition = allFieldsKeys.ToHashSet();
+                foreach (var value in kvp.Value)
+                {
+                    var validFieldsForValue = input.ForWhichFieldsIsThisValueValid(value);
+                    validFieldsAtPosition.IntersectWith(validFieldsForValue);
+                }
+                validFieldsByPosition[kvp.Key] = validFieldsAtPosition;
+            }
+
+            return validFieldsByPosition;
+        }
+
+        private static Dictionary<int, List<int>> GetValuesGroupedByPosition(List<CryptPassport> validPasses)
+        {
+            var numberOfFieldsInAPassport = validPasses.First().Values.Count;
+            Dictionary<int, List<int>> valuesByFieldPositionInPassport = new Dictionary<int, List<int>>();
+            for (int i = 0; i < numberOfFieldsInAPassport; i++)
+            {
+                //retrieve all the fields at position i
+                var list = new List<int>();
+                foreach (var p in validPasses)
+                {
+                    list.Add(p.Values.ElementAt(i));
+                }
+                valuesByFieldPositionInPassport[i] = list;
+            }
+
+            return valuesByFieldPositionInPassport;
+        }
+
+        private static List<CryptPassport> GetValidPassports(InputClass input)
+        {
+            var validPasses = new List<CryptPassport>();
+            foreach (var passport in input.CryptPassports)
+            {
+                var valid = true;
+                foreach (var value in passport.Values)
+                {
+                    var a = input.ValueValidForField(value);
+                    if (string.IsNullOrEmpty(a))
+                    {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid)
+                {
+                    validPasses.Add(passport);
+                }
+            }
+
+            return validPasses;
         }
 
         private static InputClass ReadInput(string fileName)
@@ -65,7 +157,7 @@ namespace AdventOfCode
         public string Name { get; set; }
         List<ValueRange> ValidRanges { get; set; }
 
-        
+
         public PassportField(string input)
         {
             ValidRanges = new List<ValueRange>();
@@ -142,6 +234,19 @@ namespace AdventOfCode
                 }
             }
             return string.Empty;
+        }
+
+        public List<string> ForWhichFieldsIsThisValueValid(int value)
+        {
+            var list = new List<string>();
+            foreach (var field in PassportFields)
+            {
+                if (field.ValueValidForField(value))
+                {
+                    list.Add(field.Name);
+                }
+            }
+            return list;
         }
     }
 }
