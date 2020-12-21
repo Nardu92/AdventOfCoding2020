@@ -463,7 +463,7 @@ namespace AdventOfCode2020_Tests
 
 
         [Fact]
-        private static void Test_Test1()
+        private static void Test_Test1_Sol1()
         {
             string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
             var actual = Day20.Solution1(fileName);
@@ -478,6 +478,16 @@ namespace AdventOfCode2020_Tests
             string fileName = @".\..\..\..\..\AdventOfCode\Day20\Input.txt";
             var actual = Day20.Solution2(fileName);
             var expected = 0;
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
+        private static void Test_Test1_Sol2()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var actual = Day20.Solution1(fileName);
+            var expected = 273;
             Assert.Equal(expected, actual);
         }
 
