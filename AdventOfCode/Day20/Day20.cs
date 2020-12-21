@@ -11,29 +11,24 @@ namespace AdventOfCode
         public static long Solution1(string fileName = @".\..\..\..\Day20\Input.txt", int startingID = 3257)
         {
             var input = ReadInput(fileName);
-            var picturesByBorders = new Dictionary<int, List<Picture>>();
-            foreach (var kvp in input)
-            {
-                foreach (var id in kvp.Value.AllPossibleIds)
-                {
-                    if(!picturesByBorders.TryGetValue(id, out var picList))
-                    {
-                        picList = new List<Picture>();
-                        picturesByBorders[id] = picList;
-                    }
-                    picList.Add(kvp.Value);
-                }
-            }
+            Dictionary<int, List<Picture>> picturesByBorders = GetPicturesByBorders(input);
+            
+            long total = 1;
+            CornersIds(input, picturesByBorders).ForEach(x => total *= x);
+            return total;
 
+        }
+
+        private static List<int> CornersIds(Dictionary<int, Picture> input, Dictionary<int, List<Picture>> picturesByBorders)
+        {
             Dictionary<int, int> numberOfCommonBordersByPictureId = new Dictionary<int, int>();
 
-            List<Picture> edges = new List<Picture>();
-            foreach(Picture p in input.Values)
+            foreach (Picture p in input.Values)
             {
                 var count = 0;
-                foreach( var id in p.AllPossibleIds)
+                foreach (var id in p.AllPossibleIds)
                 {
-                    if(picturesByBorders[id].Count == 1)
+                    if (picturesByBorders[id].Count == 1)
                     {
                         count++;
                     }
@@ -42,17 +37,52 @@ namespace AdventOfCode
             }
 
             var l = numberOfCommonBordersByPictureId.Where(x => x.Value == 0).Select(x => x.Key).ToList();
+            return l;
+        }
 
-            long total = 1;
-            l.ForEach(x => total *= x);
-            return total;
+        private static Dictionary<int, List<Picture>> GetPicturesByBorders(Dictionary<int, Picture> input)
+        {
+            var picturesByBorders = new Dictionary<int, List<Picture>>();
+            foreach (var kvp in input)
+            {
+                foreach (var id in kvp.Value.AllPossibleIds)
+                {
+                    if (!picturesByBorders.TryGetValue(id, out var picList))
+                    {
+                        picList = new List<Picture>();
+                        picturesByBorders[id] = picList;
+                    }
+                    picList.Add(kvp.Value);
+                }
+            }
 
+            return picturesByBorders;
         }
 
         public static long Solution2(string fileName = @".\..\..\..\Day20\Input.txt")
         {
+
             var input = ReadInput(fileName);
-            long total = 0;
+            Dictionary<int, List<Picture>> picturesByBorders = GetPicturesByBorders(input);
+            var corners = CornersIds(input, picturesByBorders);
+            var starting = corners.First();
+
+            Dictionary<int, int> numberOfCommonBordersByPictureId = new Dictionary<int, int>();
+
+            foreach (Picture p in input.Values)
+            {
+                var count = 0;
+                foreach (var id in p.AllPossibleIds)
+                {
+                    if (picturesByBorders[id].Count == 1)
+                    {
+                        count++;
+                    }
+                }
+                numberOfCommonBordersByPictureId[p.Id] = 4 - count;
+            }
+
+            long total = 1;
             return total;
 
         }
@@ -117,12 +147,12 @@ namespace AdventOfCode
         public List<int> AllPossibleIds { 
             
             get {
-                /*if(allPossibleIds == null)
+                if(allPossibleIds == null)
                 {
                     allPossibleIds = GetAllPossibleIds();
                 }
-                */
-                return GetAllPossibleIds();
+                
+                return allPossibleIds;
             }
         }
 
@@ -278,7 +308,6 @@ namespace AdventOfCode
         public override string ToString()
         {
             return $"Pic '{Id}'";
-            return base.ToString();
         }
     }
 }
