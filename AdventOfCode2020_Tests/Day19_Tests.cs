@@ -93,6 +93,14 @@ namespace AdventOfCode2020_Tests
             Assert.Equal("aabb", messages.ElementAt(4));
         }
 
+        [Fact]
+        private static void Test_Sol1()
+        {
+            Dictionary<int, Day19Rule> ruleById = InitRules();
+            var solution = Day19.Solution1(@".\..\..\..\..\AdventOfCode\Day19\Input.txt");
+            Assert.Equal(151, solution);
+        }
+        
         private static Dictionary<int, Day19Rule> InitRules()
         {
             string fileName = @".\..\..\..\..\AdventOfCode\Day19\Input.txt";

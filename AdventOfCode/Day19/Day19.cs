@@ -10,13 +10,13 @@ namespace AdventOfCode
     {
         public static long Solution1(string fileName = @".\..\..\..\Day19\Input.txt")
         {
-            var lines = ReadInput(fileName, true);
-            Dictionary<int, Day19Rule> ruleById = CreateRules(lines.Item1);
-            
+            var input = ReadInput(fileName, true);
+            Dictionary<int, Day19Rule> ruleById = CreateRules(input.Item1);
+
             var rule0 = GenerateMessages(ruleById, 0);
             //var flattenedRules = FlattenRules(ruleById);
             long total = 0;
-            foreach (var item in lines.Item2)
+            foreach (var item in input.Item2)
             {
                 if (rule0.Contains(item))
                 {
@@ -33,7 +33,22 @@ namespace AdventOfCode
         public static long Solution2(string fileName = @".\..\..\..\Day19\Input.txt")
         {
             var lines = ReadInput(fileName, true);
+            Dictionary<int, Day19Rule> ruleById = CreateRules(lines.Item1);
+            var rule8 = new Day19Rule("8: 42 | 42 8");
+            var rule11 = new Day19Rule("42 31 | 42 11 31");
+            ruleById[8] = rule8;
+            ruleById[11] = rule11;
+
+            var rule0Messages = GenerateMessages(ruleById, 0);
+            //var flattenedRules = FlattenRules(ruleById);
             long total = 0;
+            foreach (var item in lines.Item2)
+            {
+                if (rule0Messages.Contains(item))
+                {
+                    total++;
+                }
+            }
 
             return total;
 
@@ -93,14 +108,17 @@ namespace AdventOfCode
             else
             {
                 var g1r1 = GenerateMessages(ruleById, rule.Group1.Rule1Id);
+
                 if (rule.Group1.Rule2Id != -1)
                 {
                     var g1r2 = GenerateMessages(ruleById, rule.Group1.Rule2Id);
                     foreach (var r1 in g1r1)
+                    {
                         foreach (var r2 in g1r2)
                         {
                             list.Add($"{r1}{r2}");
                         }
+                    }
                 }
                 else
                 {
@@ -209,6 +227,7 @@ namespace AdventOfCode
     {
         public int Rule1Id { get; private set; }
         public int Rule2Id { get; private set; }
+        public int Rule3Id { get; private set; }
 
         public bool LeafRule { get; private set; }
 
@@ -234,6 +253,14 @@ namespace AdventOfCode
                     var tokens = input.Split(" ");
                     Rule1Id = Convert.ToInt32(tokens[0]);
                     Rule2Id = Convert.ToInt32(tokens[1]);
+                    if (tokens.Length == 3)
+                    {
+                        Rule3Id = Convert.ToInt32(tokens[2]);
+                    }
+                    else
+                    {
+                        Rule3Id = -1;
+                    }
                 }
                 else
                 {
