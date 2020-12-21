@@ -8,15 +8,46 @@ namespace AdventOfCode
 {
     public class Day20
     {
-        public static long Solution1(string fileName = @".\..\..\..\Day20\Input.txt")
+        public static long Solution1(string fileName = @".\..\..\..\Day20\Input.txt", int startingID = 3257)
         {
             var input = ReadInput(fileName);
-            long total = 0;
+            var picturesByBorders = new Dictionary<int, List<Picture>>();
+            foreach (var kvp in input)
+            {
+                foreach (var id in kvp.Value.AllPossibleIds)
+                {
+                    if(!picturesByBorders.TryGetValue(id, out var picList))
+                    {
+                        picList = new List<Picture>();
+                        picturesByBorders[id] = picList;
+                    }
+                    picList.Add(kvp.Value);
+                }
+            }
+
+            Dictionary<int, int> numberOfCommonBordersByPictureId = new Dictionary<int, int>();
+
+            List<Picture> edges = new List<Picture>();
+            foreach(Picture p in input.Values)
+            {
+                var count = 0;
+                foreach( var id in p.AllPossibleIds)
+                {
+                    if(picturesByBorders[id].Count == 1)
+                    {
+                        count++;
+                    }
+                }
+                numberOfCommonBordersByPictureId[p.Id] = 4 - count;
+            }
+
+            var l = numberOfCommonBordersByPictureId.Where(x => x.Value == 0).Select(x => x.Key).ToList();
+
+            long total = 1;
+            l.ForEach(x => total *= x);
             return total;
 
         }
-
-
 
         public static long Solution2(string fileName = @".\..\..\..\Day20\Input.txt")
         {
@@ -24,18 +55,16 @@ namespace AdventOfCode
             long total = 0;
             return total;
 
-
         }
-
 
         public static Dictionary<int, Picture> ReadInput(string fileName)
         {
             List<Picture> picturesList = new List<Picture>();
             using StreamReader inputFile = new StreamReader(fileName);
-            List<string> pictures = new List<string>();
             string title = inputFile.ReadLine();
             do
             {
+                List<string> pictures = new List<string>();
                 string line;
                 while (!string.IsNullOrEmpty(line = inputFile.ReadLine()))
                 {
@@ -51,9 +80,15 @@ namespace AdventOfCode
 
     public class Picture
     {
+        
         public int Id { get; private set; }
 
         public char[][] Pixels { get; private set; }
+
+        public Picture Top { get; set; }
+        public Picture Bottom { get; set; }
+        public Picture Left { get; set; }
+        public Picture Right { get; set; }
 
         int Height = 10;
         int Width = 10;
@@ -76,6 +111,42 @@ namespace AdventOfCode
                     Pixels[i][j] = line[j];
                 }
             }
+        }
+
+        private List<int> allPossibleIds; 
+        public List<int> AllPossibleIds { 
+            
+            get {
+                /*if(allPossibleIds == null)
+                {
+                    allPossibleIds = GetAllPossibleIds();
+                }
+                */
+                return GetAllPossibleIds();
+            }
+        }
+
+        public List<int> GetAllPossibleIds()
+        {
+            var ids = new List<int>();
+            
+            var t = GetTopBorderId();
+            ids.Add(t);
+            ids.Add(GetReverseId(t));
+            
+            var b = GetBottomBorderId();
+            ids.Add(b);
+            ids.Add(GetReverseId(b));
+
+            var r = GetRightBorderId();
+            ids.Add(r);
+            ids.Add(GetReverseId(r));
+
+            var l = GetLeftBorderId();
+            ids.Add(l);
+            ids.Add(GetReverseId(l));
+
+            return ids;
         }
 
         public int GetTopBorderId()
@@ -142,7 +213,6 @@ namespace AdventOfCode
             return false;
         }
 
-
         public int GetReverseId(int id)
         {
             return Convert.ToInt32(new string(Convert.ToString(id, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
@@ -168,7 +238,6 @@ namespace AdventOfCode
 
             Pixels = tempPixels;
         }
-
 
         public void MirrorHorizzontally()
         {
@@ -206,5 +275,10 @@ namespace AdventOfCode
             Pixels = tempPixels;
         }
 
+        public override string ToString()
+        {
+            return $"Pic '{Id}'";
+            return base.ToString();
+        }
     }
 }

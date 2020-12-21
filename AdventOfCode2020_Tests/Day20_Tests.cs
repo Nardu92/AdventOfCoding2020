@@ -266,5 +266,220 @@ namespace AdventOfCode2020_Tests
             Assert.Equal(botId, p.GetBottomBorderId());
             Assert.Equal(lefId, p.GetLeftBorderId());
         }
+
+
+        [Fact]
+        private static void Test_AllPossibleIds()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var pictures = Day20.ReadInput(fileName);
+
+            /*
+            Tile 2311:
+            ..##.#..#.
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+             */
+
+            var p = pictures[2311];
+
+            var topId = 210;
+            var botId = 231;
+            var lefId = 498;
+            var rigId = 89;
+
+            var mirroredTopId = Convert.ToInt32(new string(Convert.ToString(topId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredBottomId = Convert.ToInt32(new string(Convert.ToString(botId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredRigId = Convert.ToInt32(new string(Convert.ToString(rigId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredLefId = Convert.ToInt32(new string(Convert.ToString(lefId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+
+            var ids = p.GetAllPossibleIds();
+
+            Assert.Equal(8, ids.Count);
+            Assert.Contains(topId, ids);
+            Assert.Contains(botId, ids);
+            Assert.Contains(lefId, ids);
+            Assert.Contains(rigId, ids);
+            Assert.Contains(mirroredTopId, ids);
+            Assert.Contains(mirroredBottomId, ids);
+            Assert.Contains(mirroredRigId, ids);
+            Assert.Contains(mirroredLefId, ids);
+        }
+
+        [Fact]
+        private static void Test_AllPossibleIdsAfterRotation()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var pictures = Day20.ReadInput(fileName);
+
+            /*
+            Tile 2311:
+            ..##.#..#.
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+             */
+
+            var p = pictures[2311];
+
+            var topId = 210;
+            var botId = 231;
+            var lefId = 498;
+            var rigId = 89;
+
+            var mirroredTopId = Convert.ToInt32(new string(Convert.ToString(topId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredBottomId = Convert.ToInt32(new string(Convert.ToString(botId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredRigId = Convert.ToInt32(new string(Convert.ToString(rigId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredLefId = Convert.ToInt32(new string(Convert.ToString(lefId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+
+            p.RotateClockwise();
+            var ids = p.GetAllPossibleIds();
+
+            Assert.Equal(8, ids.Count);
+            Assert.Contains(topId, ids);
+            Assert.Contains(botId, ids);
+            Assert.Contains(lefId, ids);
+            Assert.Contains(rigId, ids);
+            Assert.Contains(mirroredTopId, ids);
+            Assert.Contains(mirroredBottomId, ids);
+            Assert.Contains(mirroredRigId, ids);
+            Assert.Contains(mirroredLefId, ids);
+        }
+
+        [Fact]
+        private static void Test_AllPossibleIdsAfterHorMirror()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var pictures = Day20.ReadInput(fileName);
+
+            /*
+            Tile 2311:
+            ..##.#..#.
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+             */
+
+            var p = pictures[2311];
+
+            var topId = 210;
+            var botId = 231;
+            var lefId = 498;
+            var rigId = 89;
+
+            var mirroredTopId = Convert.ToInt32(new string(Convert.ToString(topId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredBottomId = Convert.ToInt32(new string(Convert.ToString(botId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredRigId = Convert.ToInt32(new string(Convert.ToString(rigId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredLefId = Convert.ToInt32(new string(Convert.ToString(lefId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+
+            p.MirrorHorizzontally();
+            var ids = p.GetAllPossibleIds();
+
+            Assert.Equal(8, ids.Count);
+            Assert.Contains(topId, ids);
+            Assert.Contains(botId, ids);
+            Assert.Contains(lefId, ids);
+            Assert.Contains(rigId, ids);
+            Assert.Contains(mirroredTopId, ids);
+            Assert.Contains(mirroredBottomId, ids);
+            Assert.Contains(mirroredRigId, ids);
+            Assert.Contains(mirroredLefId, ids);
+        }
+
+        [Fact]
+        private static void Test_AllPossibleIdsAfterVertMirror()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var pictures = Day20.ReadInput(fileName);
+
+            /*
+            Tile 2311:
+            ..##.#..#.
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+             */
+
+            var p = pictures[2311];
+
+            var topId = 210;
+            var botId = 231;
+            var lefId = 498;
+            var rigId = 89;
+
+            var mirroredTopId = Convert.ToInt32(new string(Convert.ToString(topId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredBottomId = Convert.ToInt32(new string(Convert.ToString(botId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredRigId = Convert.ToInt32(new string(Convert.ToString(rigId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+            var mirroredLefId = Convert.ToInt32(new string(Convert.ToString(lefId, 2).PadLeft(10, '0').Reverse().ToArray()), 2);
+
+            p.MirrorVertically();
+            var ids = p.GetAllPossibleIds();
+
+            Assert.Equal(8, ids.Count);
+            Assert.Contains(topId, ids);
+            Assert.Contains(botId, ids);
+            Assert.Contains(lefId, ids);
+            Assert.Contains(rigId, ids);
+            Assert.Contains(mirroredTopId, ids);
+            Assert.Contains(mirroredBottomId, ids);
+            Assert.Contains(mirroredRigId, ids);
+            Assert.Contains(mirroredLefId, ids);
+        }
+
+
+        [Fact]
+        private static void Test_Sol1()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Input.txt";
+            var actual = Day20.Solution1(fileName);
+            var expected = 14986175499719;
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
+        private static void Test_Test1()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var actual = Day20.Solution1(fileName);
+            var expected = 20899048083289;
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
+        private static void Test_Sol2()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Input.txt";
+            var actual = Day20.Solution2(fileName);
+            var expected = 0;
+            Assert.Equal(expected, actual);
+        }
+
     }
 }
