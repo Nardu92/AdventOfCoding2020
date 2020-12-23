@@ -193,7 +193,7 @@ namespace AdventOfCode2020_Tests
         {
             string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
             var pictures = Day20.ReadInput(fileName);
-            
+
             /*
             Tile 2311:
             ..##.#..#.
@@ -491,5 +491,98 @@ namespace AdventOfCode2020_Tests
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        private static void Test_GetHashNum()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var pictures = Day20.ReadInput(fileName);
+            /*
+            Tile 2311:
+            0011010010
+            ..##.#..#. 0001011001
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+            
+            0011100111
+
+            left: 0111110010
+             */
+            var p = pictures[2311];
+            Assert.Equal(29, p.GetHashNumber());
+        }
+
+        [Fact]
+        private static void Test_TotalGetHashNum()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
+            var pictures = Day20.ReadInput(fileName);
+            /*
+            Tile 2311:
+            0011010010
+            ..##.#..#. 0001011001
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+            
+            0011100111
+
+            left: 0111110010
+             */
+            var actual = 0;
+            foreach (var p in pictures)
+            {
+                actual += p.Value.GetHashNumber();
+            }
+            var seaM = 15;
+            var expected = 273 + 15 * 2;
+            Assert.Equal(expected, actual);
+
+        }
+
+        [Fact]
+        private static void Test_TotalGetHashNumForInput()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\Input.txt";
+            var pictures = Day20.ReadInput(fileName);
+            /*
+            Tile 2311:
+            0011010010
+            ..##.#..#. 0001011001
+            ##..#.....
+            #...##..#.
+            ####.#...#
+            ##.##.###.
+            ##...#.###
+            .#.#.#..##
+            ..#....#..
+            ###...#.#.
+            ..###..###
+            
+            0011100111
+
+            left: 0111110010
+             */
+            var actual = 0;
+            foreach (var p in pictures)
+            {
+                actual += p.Value.GetHashNumber();
+            }
+            var expected = 2506;
+            Assert.Equal(expected, actual);
+
+        }
     }
 }

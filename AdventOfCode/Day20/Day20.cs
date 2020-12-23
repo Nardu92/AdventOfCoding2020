@@ -12,7 +12,7 @@ namespace AdventOfCode
         {
             var input = ReadInput(fileName);
             Dictionary<int, List<Picture>> picturesByBorders = GetPicturesByBorders(input);
-            
+
             long total = 1;
             CornersIds(input, picturesByBorders).ForEach(x => total *= x);
             return total;
@@ -110,7 +110,7 @@ namespace AdventOfCode
 
     public class Picture
     {
-        
+
         public int Id { get; private set; }
 
         public char[][] Pixels { get; private set; }
@@ -143,27 +143,44 @@ namespace AdventOfCode
             }
         }
 
-        private List<int> allPossibleIds; 
-        public List<int> AllPossibleIds { 
-            
-            get {
-                if(allPossibleIds == null)
+        private List<int> allPossibleIds;
+        public List<int> AllPossibleIds
+        {
+
+            get
+            {
+                if (allPossibleIds == null)
                 {
                     allPossibleIds = GetAllPossibleIds();
                 }
-                
+
                 return allPossibleIds;
             }
         }
 
+        public int GetHashNumber()
+        {
+            int total = 0;
+            for (int i = 1; i < (Height - 1); i++)
+            {
+                for (int j = 1; j < Width-1; j++)
+                {
+                    if (Pixels [i][j] == '#')
+                    {
+                        total++;
+                    }
+                }
+            }
+            return total;
+        }
         public List<int> GetAllPossibleIds()
         {
             var ids = new List<int>();
-            
+
             var t = GetTopBorderId();
             ids.Add(t);
             ids.Add(GetReverseId(t));
-            
+
             var b = GetBottomBorderId();
             ids.Add(b);
             ids.Add(GetReverseId(b));
