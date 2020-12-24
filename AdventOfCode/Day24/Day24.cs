@@ -13,17 +13,19 @@ namespace AdventOfCode
         {
             var instructions = ReadInput(fileName);
 
-            var map = new HexTileMap(instructions.Max(x => x.Directions.Count)*2);
-            foreach (var i in instructions)
-            {
-                map.NavigateToTileAndFlip(i);
-            }
-            return map.CountFlipped() ;
+            var map = new HexTileMap(instructions.Max(x => x.Directions.Count) * 2);
+            map.InitBlackTiles(instructions);
+            return map.CountFlipped();
         }
 
-        public static long Solution2(string fileName = @".\..\..\..\Day21\Input.txt")
+        public static long Solution2(string fileName = @".\..\..\..\Day24\Input.txt")
         {
-            return 0;
+            var instructions = ReadInput(fileName);
+            var map = new HexTileMap(instructions.Max(x => x.Directions.Count) * 2 * 5);
+            map.SetAllToWhite();
+            map.InitBlackTiles(instructions);
+            map.ChangeTiles(100);
+            return map.CountFlipped();
         }
 
         public static List<TileInstruction> ReadInput(string fileName)
@@ -85,15 +87,26 @@ namespace AdventOfCode
     public class HexTile
     {
         public bool Color { get; private set; }
+        public bool? NextRoundColor { get; set; }
 
         public HexTile()
         {
             Color = false;
+            NextRoundColor = null;
         }
 
         public void Flip()
         {
             Color = !Color;
+        }
+
+        public void ApplyNextRoundColor()
+        {
+            if (NextRoundColor.HasValue)
+            {
+                Color = NextRoundColor.Value;
+                NextRoundColor = null;
+            }
         }
     }
 
@@ -148,7 +161,7 @@ namespace AdventOfCode
         {
             var destinationCoordinate = CenterCoordinate;
 
-            
+
             foreach (var hexDirection in tileInstruction.Directions)
             {
                 var p = axialCoordinateByHexDirection[hexDirection];
@@ -156,7 +169,7 @@ namespace AdventOfCode
                 destinationCoordinate.Y += p.Y;
             }
 
-            if(HexTiles[destinationCoordinate.X, destinationCoordinate.Y] == null)
+            if (HexTiles[destinationCoordinate.X, destinationCoordinate.Y] == null)
             {
                 HexTiles[destinationCoordinate.X, destinationCoordinate.Y] = new HexTile();
             }
@@ -164,5 +177,82 @@ namespace AdventOfCode
             return HexTiles[destinationCoordinate.X, destinationCoordinate.Y];
         }
 
+        public void InitBlackTiles(List<TileInstruction> instructions)
+        {
+
+            foreach (var i in instructions)
+            {
+                NavigateToTileAndFlip(i);
+            }
+        }
+
+        public void SetAllToWhite()
+        {
+            for (int i = 0; i < MapSize; i++)
+            {
+                for (int j = 0; j < MapSize; j++)
+                {
+                    HexTiles[i, j] = new HexTile();
+                }
+            }
+        }
+
+        public void ChangeTiles(int rounds)
+        {
+            for (int i = 0; i < rounds; i++)
+            {
+                CalculateAndApplyRound();
+            }
+        }
+
+        public void CalculateAndApplyRound()
+        {
+            CalculateNextRound();
+            ApplyNextRound();
+        }
+
+        private void CalculateNextRound()
+        {
+            for (int i = 1; i < MapSize - 1; i++)
+            {
+                for (int j = 1; j < MapSize - 1; j++)
+                {
+                    var blackTiles = 0;
+                    foreach (var adjecent in axialCoordinateByHexDirection)
+                    {
+                        var adjecentTile = HexTiles[i + adjecent.Value.X, j + adjecent.Value.Y];
+                        if (adjecentTile != null && adjecentTile.Color)
+                        {
+                            blackTiles++;
+                        }
+                    }
+                    if (HexTiles[i, j].Color)
+                    {
+                        if (blackTiles == 0 || blackTiles > 2)
+                        {
+                            HexTiles[i, j].NextRoundColor = false;
+                        }
+                    }
+                    else
+                    {
+                        if (blackTiles == 2)
+                        {
+                            HexTiles[i, j].NextRoundColor = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ApplyNextRound()
+        {
+            for (int i = 1; i < MapSize - 1; i++)
+            {
+                for (int j = 1; j < MapSize - 1; j++)
+                {
+                    HexTiles[i, j].ApplyNextRoundColor();
+                }
+            }
+        }
     }
 }
