@@ -486,7 +486,7 @@ namespace AdventOfCode2020_Tests
         private static void Test_Test1_Sol2()
         {
             string fileName = @".\..\..\..\..\AdventOfCode\Day20\Test1.txt";
-            var actual = Day20.Solution1(fileName);
+            var actual = Day20.Solution2(fileName);
             var expected = 273;
             Assert.Equal(expected, actual);
         }
@@ -546,7 +546,6 @@ namespace AdventOfCode2020_Tests
             {
                 actual += p.Value.GetHashNumber();
             }
-            var seaM = 15;
             var expected = 273 + 15 * 2;
             Assert.Equal(expected, actual);
 

@@ -62,29 +62,113 @@ namespace AdventOfCode
         public static long Solution2(string fileName = @".\..\..\..\Day20\Input.txt")
         {
 
-            var input = ReadInput(fileName);
-            Dictionary<int, List<Picture>> picturesByBorders = GetPicturesByBorders(input);
-            var corners = CornersIds(input, picturesByBorders);
-            var starting = corners.First();
+            var picturesById = ReadInput(fileName);
+            Dictionary<int, List<Picture>> picturesByBorders = GetPicturesByBorders(picturesById);
+            var corners = CornersIds(picturesById, picturesByBorders);
 
-            Dictionary<int, int> numberOfCommonBordersByPictureId = new Dictionary<int, int>();
-
-            foreach (Picture p in input.Values)
-            {
-                var count = 0;
-                foreach (var id in p.AllPossibleIds)
-                {
-                    if (picturesByBorders[id].Count == 1)
-                    {
-                        count++;
-                    }
-                }
-                numberOfCommonBordersByPictureId[p.Id] = 4 - count;
-            }
+            var topLeftCornerId = corners.First();
+            
+            BuildImage(picturesById, picturesByBorders, topLeftCornerId);
 
             long total = 1;
             return total;
 
+        }
+
+        private static void BuildImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
+        {
+            var firstOfRow = picturesById[topLeftCornerId];
+            //pick on one of the corners and rotate it to be the top left one
+            EnsureChosenCornerIsTopLeft(picturesById, picturesByBorders, firstOfRow);
+            var width = Math.Sqrt(picturesById.Count);
+            for (int i = 0; i < width; i++)
+            {
+                SetRow(picturesById, picturesByBorders, firstOfRow);
+                FindBottomImage(picturesById, picturesByBorders, firstOfRow);
+                firstOfRow = firstOfRow.Bottom;
+            }
+        }
+
+        private static void SetRow(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture firstOfTheRow)
+        {
+            var current = firstOfTheRow;
+            var width = Math.Sqrt(picturesById.Count);
+            for (int i = 0; i < width - 1; i++)
+            {
+                FindRightImage(picturesById, picturesByBorders, current);
+                current = current.Right;
+            }
+        }
+
+        private static void FindRightImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture picture)
+        {
+            int matchingId = picturesByBorders[picture.GetRightBorderId()].Select(x => x.Id).Where(x => x != picture.Id).Single();
+            var found = false;
+            do
+            {
+                var rightBorderId = picture.GetRightBorderId();
+                for (int i = 0; i < 4; i++)
+                {
+                    var righPicture = picturesById[matchingId];
+                    if (righPicture.GetLeftBorderId() == rightBorderId)
+                    {
+                        picture.Right = righPicture;
+                        righPicture.Left = picture;
+                        found = true;
+                        break;
+                    }
+                    if (righPicture.GetReverseId(righPicture.GetLeftBorderId()) == rightBorderId)
+                    {
+                        picture.Right = righPicture;
+                        righPicture.Left = picture;
+                        found = true;
+                        righPicture.MirrorVertically();
+                        break;
+                    }
+                    righPicture.RotateClockwise();
+                }
+            } while (!found);
+        }
+
+        private static void FindBottomImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture picture)
+        {
+            int matchingId = picturesByBorders[picture.GetBottomBorderId()].Select(x => x.Id).Where(x => x != picture.Id).Single();
+            var found = false;
+            do
+            {
+                var rightBorderId = picture.GetBottomBorderId();
+                for (int i = 0; i < 4; i++)
+                {
+                    var righPicture = picturesById[matchingId];
+                    if (righPicture.GetTopBorderId() == rightBorderId)
+                    {
+                        picture.Bottom = righPicture;
+                        righPicture.Top = picture;
+                        found = true;
+                        break;
+                    }
+                    if (righPicture.GetReverseId(righPicture.GetTopBorderId()) == rightBorderId)
+                    {
+                        picture.Bottom = righPicture;
+                        righPicture.Top = picture;
+                        found = true;
+                        righPicture.MirrorHorizzontally();
+                        break;
+                    }
+                    righPicture.RotateClockwise();
+                }
+            } while (!found);
+        }
+
+        private static void EnsureChosenCornerIsTopLeft(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture current)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                if (picturesByBorders[current.GetTopBorderId()].Count == 2)
+                {
+                    current.RotateClockwise();
+                }
+            }
         }
 
         public static Dictionary<int, Picture> ReadInput(string fileName)
@@ -143,6 +227,12 @@ namespace AdventOfCode
             }
         }
 
+        //Constructor for mosaic
+        public Picture(int id, Dictionary<int,Picture> picturesById, int idOfTopLeftCorner)
+        {
+           
+            
+        }
         private List<int> allPossibleIds;
         public List<int> AllPossibleIds
         {
@@ -163,9 +253,9 @@ namespace AdventOfCode
             int total = 0;
             for (int i = 1; i < (Height - 1); i++)
             {
-                for (int j = 1; j < Width-1; j++)
+                for (int j = 1; j < Width - 1; j++)
                 {
-                    if (Pixels [i][j] == '#')
+                    if (Pixels[i][j] == '#')
                     {
                         total++;
                     }
