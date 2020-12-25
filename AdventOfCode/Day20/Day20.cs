@@ -67,7 +67,7 @@ namespace AdventOfCode
             var corners = CornersIds(picturesById, picturesByBorders);
 
             var topLeftCornerId = corners.First();
-            
+
             BuildImage(picturesById, picturesByBorders, topLeftCornerId);
 
             long total = 1;
@@ -78,15 +78,19 @@ namespace AdventOfCode
         private static void BuildImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
         {
             var firstOfRow = picturesById[topLeftCornerId];
+            //just for debug
+            firstOfRow.MirrorHorizzontally();
+            //just for debug
             //pick on one of the corners and rotate it to be the top left one
             EnsureChosenCornerIsTopLeft(picturesById, picturesByBorders, firstOfRow);
             var width = Math.Sqrt(picturesById.Count);
-            for (int i = 0; i < width; i++)
+            for (int i = 0; i < width - 1; i++)
             {
                 SetRow(picturesById, picturesByBorders, firstOfRow);
                 FindBottomImage(picturesById, picturesByBorders, firstOfRow);
                 firstOfRow = firstOfRow.Bottom;
             }
+            SetRow(picturesById, picturesByBorders, firstOfRow);
         }
 
         private static void SetRow(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture firstOfTheRow)
@@ -114,6 +118,11 @@ namespace AdventOfCode
                     {
                         picture.Right = righPicture;
                         righPicture.Left = picture;
+                        if (picture.Top != null)
+                        {
+                            righPicture.Top = picture.Top.Right;
+                            picture.Top.Right.Bottom = righPicture;
+                        }
                         found = true;
                         break;
                     }
@@ -122,7 +131,12 @@ namespace AdventOfCode
                         picture.Right = righPicture;
                         righPicture.Left = picture;
                         found = true;
-                        righPicture.MirrorVertically();
+                        righPicture.MirrorHorizzontally();
+                        if (picture.Top != null)
+                        {
+                            righPicture.Top = picture.Top.Right;
+                            picture.Top.Right.Bottom = righPicture;
+                        }
                         break;
                     }
                     righPicture.RotateClockwise();
@@ -136,26 +150,26 @@ namespace AdventOfCode
             var found = false;
             do
             {
-                var rightBorderId = picture.GetBottomBorderId();
+                var bottomId = picture.GetBottomBorderId();
                 for (int i = 0; i < 4; i++)
                 {
-                    var righPicture = picturesById[matchingId];
-                    if (righPicture.GetTopBorderId() == rightBorderId)
+                    var bottomPicture = picturesById[matchingId];
+                    if (bottomPicture.GetTopBorderId() == bottomId)
                     {
-                        picture.Bottom = righPicture;
-                        righPicture.Top = picture;
+                        picture.Bottom = bottomPicture;
+                        bottomPicture.Top = picture;
                         found = true;
                         break;
                     }
-                    if (righPicture.GetReverseId(righPicture.GetTopBorderId()) == rightBorderId)
+                    if (bottomPicture.GetReverseId(bottomPicture.GetTopBorderId()) == bottomId)
                     {
-                        picture.Bottom = righPicture;
-                        righPicture.Top = picture;
+                        picture.Bottom = bottomPicture;
+                        bottomPicture.Top = picture;
                         found = true;
-                        righPicture.MirrorHorizzontally();
+                        bottomPicture.MirrorVertically();
                         break;
                     }
-                    righPicture.RotateClockwise();
+                    bottomPicture.RotateClockwise();
                 }
             } while (!found);
         }
@@ -228,10 +242,27 @@ namespace AdventOfCode
         }
 
         //Constructor for mosaic
-        public Picture(int id, Dictionary<int,Picture> picturesById, int idOfTopLeftCorner)
+        public Picture(int id, Dictionary<int, Picture> picturesById, int idOfTopLeftCorner)
         {
-           
-            
+            Id = id;
+            int sideLength = (int)Math.Sqrt(picturesById.Count);
+            for (int i = 0; i < sideLength; i++)
+            {
+                Pixels[i] = new char[sideLength];
+            }
+            Height = sideLength;
+            Width = sideLength;
+            var corner = picturesById[idOfTopLeftCorner];
+            for (int k = 0; k < corner.Height; k++)
+            {
+                for (int l = 0; l < corner.Width; l++)
+                {
+
+                }
+            }
+
+
+
         }
         private List<int> allPossibleIds;
         public List<int> AllPossibleIds
