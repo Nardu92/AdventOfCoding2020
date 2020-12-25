@@ -78,9 +78,6 @@ namespace AdventOfCode
         private static void BuildImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
         {
             var firstOfRow = picturesById[topLeftCornerId];
-            //just for debug
-            firstOfRow.MirrorHorizzontally();
-            //just for debug
             //pick on one of the corners and rotate it to be the top left one
             EnsureChosenCornerIsTopLeft(picturesById, picturesByBorders, firstOfRow);
             var width = Math.Sqrt(picturesById.Count);
