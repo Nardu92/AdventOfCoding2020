@@ -8,7 +8,7 @@ namespace AdventOfCode
 {
     public class Day25
     {
-        public static long Solution1(string input = "942387615")
+        public static long Solution1()
         {
             var door = new HandshakeParty(18356117);
             var card = new HandshakeParty(5909654);
@@ -16,20 +16,9 @@ namespace AdventOfCode
             return door.GetEncryptionKey(card.PublicKey);
         }
 
-        public static long Solution2(string input = "942387615")
+        public static long Solution2()
         {
             return 1;
-        }
-
-        public static int[] ReadInput(string input)
-        {
-            var n = input.Length;
-            var cupsIds = new int[n];
-            for (int i = 0; i < n; i++)
-            {
-                cupsIds[i] = Convert.ToInt32(input[i].ToString());
-            }
-            return cupsIds;
         }
     }
 
@@ -37,7 +26,7 @@ namespace AdventOfCode
     {
         public long SubjectNumber { get; private set; }
         public long PublicKey { get; private set; }
-        public long SecretKey { get; private set; }
+        public long EncryptionKey { get; private set; }
         public int LoopSize { get; private set; }
 
         public HandshakeParty(long publicKey)
@@ -66,6 +55,7 @@ namespace AdventOfCode
             {
                 value = TransformSubjectNumber(publicKey, value);
             }
+            EncryptionKey = value;
             return value;
         }
 
