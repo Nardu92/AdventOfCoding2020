@@ -68,14 +68,14 @@ namespace AdventOfCode
 
             var topLeftCornerId = corners.First();
 
-            BuildImage(picturesById, picturesByBorders, topLeftCornerId);
+            var mosaic = BuildImage(picturesById, picturesByBorders, topLeftCornerId);
 
             long total = 1;
             return total;
 
         }
 
-        private static void BuildImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
+        private static Picture BuildImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
         {
             var firstOfRow = picturesById[topLeftCornerId];
             //pick on one of the corners and rotate it to be the top left one
@@ -88,6 +88,9 @@ namespace AdventOfCode
                 firstOfRow = firstOfRow.Bottom;
             }
             SetRow(picturesById, picturesByBorders, firstOfRow);
+
+            var mosaic = new Picture(0, picturesById, topLeftCornerId);
+            return mosaic;
         }
 
         private static void SetRow(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture firstOfTheRow)
@@ -104,71 +107,60 @@ namespace AdventOfCode
         private static void FindRightImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture picture)
         {
             int matchingId = picturesByBorders[picture.GetRightBorderId()].Select(x => x.Id).Where(x => x != picture.Id).Single();
-            var found = false;
-            do
+            var rightBorderId = picture.GetRightBorderId();
+            for (int i = 0; i < 4; i++)
             {
-                var rightBorderId = picture.GetRightBorderId();
-                for (int i = 0; i < 4; i++)
+                var righPicture = picturesById[matchingId];
+                if (righPicture.GetLeftBorderId() == rightBorderId)
                 {
-                    var righPicture = picturesById[matchingId];
-                    if (righPicture.GetLeftBorderId() == rightBorderId)
+                    picture.Right = righPicture;
+                    righPicture.Left = picture;
+                    if (picture.Top != null)
                     {
-                        picture.Right = righPicture;
-                        righPicture.Left = picture;
-                        if (picture.Top != null)
-                        {
-                            righPicture.Top = picture.Top.Right;
-                            picture.Top.Right.Bottom = righPicture;
-                        }
-                        found = true;
-                        break;
+                        righPicture.Top = picture.Top.Right;
+                        picture.Top.Right.Bottom = righPicture;
                     }
-                    if (righPicture.GetReverseId(righPicture.GetLeftBorderId()) == rightBorderId)
-                    {
-                        picture.Right = righPicture;
-                        righPicture.Left = picture;
-                        found = true;
-                        righPicture.MirrorHorizzontally();
-                        if (picture.Top != null)
-                        {
-                            righPicture.Top = picture.Top.Right;
-                            picture.Top.Right.Bottom = righPicture;
-                        }
-                        break;
-                    }
-                    righPicture.RotateClockwise();
+
+                    break;
                 }
-            } while (!found);
+                if (righPicture.GetReverseId(righPicture.GetLeftBorderId()) == rightBorderId)
+                {
+                    picture.Right = righPicture;
+                    righPicture.Left = picture;
+                    righPicture.MirrorHorizzontally();
+                    if (picture.Top != null)
+                    {
+                        righPicture.Top = picture.Top.Right;
+                        picture.Top.Right.Bottom = righPicture;
+                    }
+                    break;
+                }
+                righPicture.RotateClockwise();
+            }
         }
 
         private static void FindBottomImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture picture)
         {
             int matchingId = picturesByBorders[picture.GetBottomBorderId()].Select(x => x.Id).Where(x => x != picture.Id).Single();
-            var found = false;
-            do
+            var bottomId = picture.GetBottomBorderId();
+            for (int i = 0; i < 4; i++)
             {
-                var bottomId = picture.GetBottomBorderId();
-                for (int i = 0; i < 4; i++)
+                var bottomPicture = picturesById[matchingId];
+                if (bottomPicture.GetTopBorderId() == bottomId)
                 {
-                    var bottomPicture = picturesById[matchingId];
-                    if (bottomPicture.GetTopBorderId() == bottomId)
-                    {
-                        picture.Bottom = bottomPicture;
-                        bottomPicture.Top = picture;
-                        found = true;
-                        break;
-                    }
-                    if (bottomPicture.GetReverseId(bottomPicture.GetTopBorderId()) == bottomId)
-                    {
-                        picture.Bottom = bottomPicture;
-                        bottomPicture.Top = picture;
-                        found = true;
-                        bottomPicture.MirrorVertically();
-                        break;
-                    }
-                    bottomPicture.RotateClockwise();
+                    picture.Bottom = bottomPicture;
+                    bottomPicture.Top = picture;
+                    break;
                 }
-            } while (!found);
+                if (bottomPicture.GetReverseId(bottomPicture.GetTopBorderId()) == bottomId)
+                {
+                    picture.Bottom = bottomPicture;
+                    bottomPicture.Top = picture;
+                    bottomPicture.MirrorVertically();
+                    break;
+                }
+                bottomPicture.RotateClockwise();
+            }
         }
 
         private static void EnsureChosenCornerIsTopLeft(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, Picture current)
@@ -242,25 +234,50 @@ namespace AdventOfCode
         public Picture(int id, Dictionary<int, Picture> picturesById, int idOfTopLeftCorner)
         {
             Id = id;
-            int sideLength = (int)Math.Sqrt(picturesById.Count);
+            var firstOfRow = picturesById[idOfTopLeftCorner];
+            int picturesPerSide = (int)Math.Sqrt(picturesById.Count);
+            int sideLength = picturesPerSide * (firstOfRow.Width - 2);
+            Pixels = new char[sideLength][];
             for (int i = 0; i < sideLength; i++)
             {
                 Pixels[i] = new char[sideLength];
             }
+
             Height = sideLength;
             Width = sideLength;
-            var corner = picturesById[idOfTopLeftCorner];
-            for (int k = 0; k < corner.Height; k++)
+            int x;
+            int y = 0;
+            var currentPicture = firstOfRow;
+            int xIncrement = currentPicture.Width - 2;
+            int yIncrement = currentPicture.Height - 2;
+            for (int i = 0; i < picturesPerSide; i++)
             {
-                for (int l = 0; l < corner.Width; l++)
+                x = 0;
+                for (int k = 0; k < picturesPerSide; k++)
                 {
-
+                    CopyInnerPictureWithoutBorders(currentPicture, x, y);
+                    x += xIncrement;
+                    currentPicture = currentPicture.Right;
                 }
+
+                y += yIncrement;
+                currentPicture = firstOfRow.Bottom;
+                firstOfRow = firstOfRow.Bottom;
             }
 
-
-
         }
+
+        private void CopyInnerPictureWithoutBorders(Picture picture, int x, int y)
+        {
+            for (int k = 1; k < picture.Height - 1; k++)
+            {
+                for (int l = 1; l < picture.Width - 1; l++)
+                {
+                    Pixels[y + k - 1][x + l - 1] = picture.Pixels[k][l];
+                }
+            }
+        }
+
         private List<int> allPossibleIds;
         public List<int> AllPossibleIds
         {
