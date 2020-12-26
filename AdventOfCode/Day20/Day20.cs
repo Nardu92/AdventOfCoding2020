@@ -207,8 +207,8 @@ namespace AdventOfCode
         public Picture Left { get; set; }
         public Picture Right { get; set; }
 
-        int Height = 10;
-        int Width = 10;
+        public int Height { get; private set; }
+        public int Width { get; private set; }
 
         public Picture(string id, List<string> pic)
         {
@@ -216,7 +216,8 @@ namespace AdventOfCode
             var indexOfSpace = id.IndexOf(' ') + 1;
             var indexOfSC = id.IndexOf(':');
             Id = Convert.ToInt32(id[indexOfSpace..indexOfSC]);
-
+            Height = pic.Count;
+            Width = pic.First().Length;
             Pixels = new char[Height][];
 
             for (int i = 0; i < Height; i++)
@@ -293,12 +294,12 @@ namespace AdventOfCode
             }
         }
 
-        public int GetHashNumber()
+        public int GetHashNumber(int borderWidth)
         {
             int total = 0;
-            for (int i = 1; i < (Height - 1); i++)
+            for (int i = borderWidth; i < (Height - borderWidth); i++)
             {
-                for (int j = 1; j < Width - 1; j++)
+                for (int j = borderWidth; j < Width - borderWidth; j++)
                 {
                     if (Pixels[i][j] == '#')
                     {

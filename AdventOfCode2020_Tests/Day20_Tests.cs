@@ -515,7 +515,7 @@ namespace AdventOfCode2020_Tests
             left: 0111110010
              */
             var p = pictures[2311];
-            Assert.Equal(29, p.GetHashNumber());
+            Assert.Equal(29, p.GetHashNumber(1));
         }
 
         [Fact]
@@ -544,7 +544,7 @@ namespace AdventOfCode2020_Tests
             var actual = 0;
             foreach (var p in pictures)
             {
-                actual += p.Value.GetHashNumber();
+                actual += p.Value.GetHashNumber(1);
             }
             var expected = 273 + 15 * 2;
             Assert.Equal(expected, actual);
@@ -577,11 +577,53 @@ namespace AdventOfCode2020_Tests
             var actual = 0;
             foreach (var p in pictures)
             {
-                actual += p.Value.GetHashNumber();
+                actual += p.Value.GetHashNumber(1);
             }
             var expected = 2506;
             Assert.Equal(expected, actual);
 
+        }
+
+
+        [Fact]
+        private static void Test_SeaMonster_HashNum()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\SeaMonster.txt";
+            var pictures = Day20.ReadInput(fileName);
+            var seaMonster = pictures[1];
+            /*
+            Tile 1:
+                              # 
+            #    ##    ##    ###
+             #  #  #  #  #  #   
+             */
+
+            var actual = seaMonster.GetHashNumber(0);
+            var expected = 15;
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
+        private static void Test_SeaMonsterWidthAndHeight()
+        {
+            string fileName = @".\..\..\..\..\AdventOfCode\Day20\SeaMonster.txt";
+            var pictures = Day20.ReadInput(fileName);
+            var seaMonster = pictures[1];
+            /*
+            Tile 1:
+                              # 
+            #    ##    ##    ###
+             #  #  #  #  #  #   
+             */
+
+            var actual = seaMonster.Width;
+            var expected = 20;
+            Assert.Equal(expected, actual);
+
+            actual = seaMonster.Height;
+            expected = 3;
+            Assert.Equal(expected, actual);
         }
     }
 }
