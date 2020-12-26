@@ -70,9 +70,12 @@ namespace AdventOfCode
 
             var mosaic = BuildMosaicImage(picturesById, picturesByBorders, topLeftCornerId);
 
-            long total = 1;
-            return total;
 
+            fileName = @".\..\..\..\..\AdventOfCode\Day20\SeaMonster.txt";
+            var pictures = Day20.ReadInput(fileName);
+            var seaMonster = pictures[1];
+            var seaMonstersNumber = mosaic.SearchForPictureWithAnyOrientation(seaMonster);
+            return mosaic.GetHashNumber(0) - seaMonster.GetHashNumber(0) * seaMonstersNumber;
         }
 
         public static Picture BuildMosaicImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
@@ -268,6 +271,59 @@ namespace AdventOfCode
 
         }
 
+        public int SearchForPictureWithAnyOrientation(Picture picture)
+        {
+            int totalOccurrencies = 0;
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    totalOccurrencies+=SearchForPicture(picture);
+                    picture.RotateClockwise();
+                }
+                picture.MirrorHorizzontally();
+            }
+            return totalOccurrencies;
+        }
+
+        public int SearchForPicture(Picture picture)
+        {
+            int totalOccurrencies = 0;
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (SearchForPictureAtPosition(x, y, picture))
+                    {
+                        totalOccurrencies++;
+                    }
+                }
+            }
+            return totalOccurrencies;
+        }
+
+        public bool SearchForPictureAtPosition(int x, int y, Picture picture)
+        {
+            if (x + picture.Width > Width || y + picture.Height > Height)
+            {
+                return false;
+            }
+
+            for (int h = 0; h < picture.Height; h++)
+            {
+                for (int w = 0; w < picture.Width; w++)
+                {
+                    var c = picture.Pixels[h][w];
+                    var p = Pixels[h + y][x + w];
+                    if (c == '#' && p != '#')
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         private void CopyInnerPictureWithoutBorders(Picture picture, int x, int y)
         {
             for (int k = 1; k < picture.Height - 1; k++)
@@ -440,6 +496,11 @@ namespace AdventOfCode
 
         public void RotateClockwise()
         {
+            //invert height and width
+            var tmp = Height;
+            Height = Width;
+            Width = tmp;
+
             char[][] tempPixels = new char[Height][];
 
             for (int i = 0; i < Height; i++)
@@ -447,11 +508,11 @@ namespace AdventOfCode
                 tempPixels[i] = new char[Width];
             }
 
-            for (int i = 0; i < Height; i++)
+            for (int i = 0; i < Width; i++)
             {
-                for (int j = 0; j < Width; j++)
+                for (int j = 0; j < Height; j++)
                 {
-                    tempPixels[j][Height - i - 1] = Pixels[i][j];
+                    tempPixels[j][Width - i - 1] = Pixels[i][j];
                 }
             }
 
