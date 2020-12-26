@@ -19,7 +19,7 @@ namespace AdventOfCode
 
         }
 
-        private static List<int> CornersIds(Dictionary<int, Picture> input, Dictionary<int, List<Picture>> picturesByBorders)
+        public static List<int> CornersIds(Dictionary<int, Picture> input, Dictionary<int, List<Picture>> picturesByBorders)
         {
             Dictionary<int, int> numberOfCommonBordersByPictureId = new Dictionary<int, int>();
 
@@ -40,7 +40,7 @@ namespace AdventOfCode
             return l;
         }
 
-        private static Dictionary<int, List<Picture>> GetPicturesByBorders(Dictionary<int, Picture> input)
+        public static Dictionary<int, List<Picture>> GetPicturesByBorders(Dictionary<int, Picture> input)
         {
             var picturesByBorders = new Dictionary<int, List<Picture>>();
             foreach (var kvp in input)
@@ -68,14 +68,14 @@ namespace AdventOfCode
 
             var topLeftCornerId = corners.First();
 
-            var mosaic = BuildImage(picturesById, picturesByBorders, topLeftCornerId);
+            var mosaic = BuildMosaicImage(picturesById, picturesByBorders, topLeftCornerId);
 
             long total = 1;
             return total;
 
         }
 
-        private static Picture BuildImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
+        public static Picture BuildMosaicImage(Dictionary<int, Picture> picturesById, Dictionary<int, List<Picture>> picturesByBorders, int topLeftCornerId)
         {
             var firstOfRow = picturesById[topLeftCornerId];
             //pick on one of the corners and rotate it to be the top left one
