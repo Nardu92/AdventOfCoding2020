@@ -15,11 +15,7 @@ namespace AdventOfCode
 
             return door.GetEncryptionKey(card.PublicKey);
         }
-
-        public static long Solution2()
-        {
-            return 1;
-        }
+        
     }
 
     public class HandshakeParty

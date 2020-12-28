@@ -18,14 +18,6 @@ namespace AdventOfCode2020_Tests
         }
 
         [Fact]
-        private static void TestSolution2()
-        {
-            var actual = Day25.Solution2();
-            var expected = 562136730660;
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
         private static void Test_CardPrivateKey()
         {
             var door = new HandshakeParty(5764801);
